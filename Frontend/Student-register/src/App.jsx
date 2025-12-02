@@ -1,14 +1,20 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from "./pages/Home"
-
+import Navbar from "./components/Navbar"
+import StudentRegisterForm from "./components/StudentRegisterForm"
+import StudentTypeSelector from './components/StudentTypeSelector'
 
 function App() {
   
   return (
-    <>
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-       <Home/>
-      </div>
-    </>
+    <Router>
+      <Navbar />
+      <Routes>
+      
+        <Route path="/" element={<StudentRegisterForm />} />
+        <Route path="/register" element={<StudentTypeSelector />} />
+      </Routes>
+    </Router>
   )
 }
 
