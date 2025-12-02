@@ -10,7 +10,7 @@ export default function StudentTypeSelector({ onSelect }) {
 
   return (
     <div className="w-full max-w-md mx-auto mt-6">
-      <h2 className="text-xl font-semibold text-center mb-4">ကျောင်းအပ်ရန် ရွေးချယ်</h2>
+      <h2 className="text-xl font-semibold text-center mb-4">ကျောင်းအပ်ရန် ရွေးချယ်ပါ </h2>
 
       <div className="flex gap-4">
         {/* NEW Student */}
@@ -18,7 +18,7 @@ export default function StudentTypeSelector({ onSelect }) {
           onClick={() => handleSelect("new")}
           className={`flex-1 py-4 rounded-xl border text-center transition-all duration-200 
           ${selected === "new" 
-            ? "bg-blue-600 text-white border-blue-700" 
+            ? "bg-green-600 text-white border-blue-700" 
             : "bg-white border-gray-300 hover:bg-gray-100"}
           `}
         >
