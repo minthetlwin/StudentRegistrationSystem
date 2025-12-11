@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import StudentVerifyForm from "../components/StudentVerifyForm.jsx";
-import StudentPasswordForm from "../components/SetPasswordForm.jsx";
+import StudentVerifyForm from "../components/authComponents/StudentVerifyForm.jsx";
+import StudentPasswordForm from "../components/authComponents/SetPasswordForm.jsx";
 import { verifyStudent, setStudentPassword } from "../services/authServices";
 import { useNavigate } from "react-router-dom";
 

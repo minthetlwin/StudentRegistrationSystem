@@ -2,7 +2,6 @@ import { AdmittedStudents } from "../models/admittedStudents.js";
 import { Students } from "../models/mainStudents.js";
 import bcrypt from "bcryptjs";
 
-
 export const verifyAdmittedStudent = async (req, res) => {
   try {
     const { nrc, g12_exam_id, enrollment_number, date_of_birth } = req.body;
@@ -14,7 +13,9 @@ export const verifyAdmittedStudent = async (req, res) => {
       });
     }
 
-    //  1. Find in AdmittedStudents ONLY
+    console.log('Verifying student:', { enrollment_number, nrc, date_of_birth });
+
+    //  Search in AdmittedStudents
     const admittedStudent = await AdmittedStudents.findOne({
       nrc,
       enrollment_number
@@ -27,7 +28,7 @@ export const verifyAdmittedStudent = async (req, res) => {
       });
     }
 
-    //  2. Date check (safe compare)
+    //  Validate DOB
     const inputDate = new Date(date_of_birth).toISOString().split("T")[0];
     const storedDate = new Date(admittedStudent.date_of_birth).toISOString().split("T")[0];
 
@@ -38,7 +39,7 @@ export const verifyAdmittedStudent = async (req, res) => {
       });
     }
 
-    // 3. G12 optional check
+    // Optional G12 check
     if (g12_exam_id && admittedStudent.g12_exam_id !== g12_exam_id) {
       return res.status(400).json({
         success: false,
@@ -46,7 +47,7 @@ export const verifyAdmittedStudent = async (req, res) => {
       });
     }
 
-    //  4. VERY IMPORTANT: Check REAL Students DB
+    //  Ensure they didn’t create account already
     const existingStudent = await Students.findOne({
       enrollment_number,
       nrc
@@ -59,8 +60,8 @@ export const verifyAdmittedStudent = async (req, res) => {
       });
     }
 
-    // 5. Verified & allowed to set password
-    return res.status(200).json({
+    //  Prepare response
+    const responseData = {
       success: true,
       message: "Student verified successfully",
       student: {
@@ -70,7 +71,11 @@ export const verifyAdmittedStudent = async (req, res) => {
         full_name: admittedStudent.full_name,
         g12_exam_id: admittedStudent.g12_exam_id
       }
-    });
+    };
+
+    console.log('Student verified successfully:', responseData.student.enrollment_number);
+
+    return res.status(200).json(responseData);
 
   } catch (error) {
     console.error("VERIFY ERROR:", error);
@@ -129,6 +134,57 @@ export const setStudentPassword = async (req, res) => {
 
   } catch (error) {
     console.error("Set Password Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const loginStudent = async (req, res) => {
+  try {
+    const { enrollment_number, nrc, password } = req.body;
+
+    if (!enrollment_number || !nrc || !password) {
+      return res.status(400).json({ success: false, message: "Enrollment number, NRC, and password are required" });
+    }
+
+    // Find student by BOTH enrollment + NRC
+    const student = await Students.findOne({ 
+      enrollment_number,
+      nrc
+    });
+
+    if (!student) {
+      return res.status(404).json({ success: false, message: "Student not found or NRC mismatch" });
+    }
+
+    // Validate password
+    const isPasswordValid = await bcrypt.compare(password, student.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: "Invalid password" });
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      { 
+        studentId: student._id, 
+        enrollment_number: student.enrollment_number 
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Remove password from response
+    const { password: _, ...studentData } = student.toObject();
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      student: studentData,
+      token
+    });
+
+  } catch (error) {
+    console.error("Login Error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
