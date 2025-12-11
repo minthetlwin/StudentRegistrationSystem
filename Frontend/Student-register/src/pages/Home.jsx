@@ -9,15 +9,7 @@ export default function Home() {
           <p className="text-gray-600">Choose your registration type</p>
         </div>
         
-        <div className="space-y-4">
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
-            New Student Registration
-          </button>
-          
-          <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
-            Existing Student Login
-          </button>
-        </div>
+        
       </div>
     </div>
   )
