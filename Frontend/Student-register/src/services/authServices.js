@@ -1,7 +1,6 @@
-// services/authService.js
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5001/api/auth";
+// const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export const verifyStudent = async (data) => {
   try {
@@ -11,8 +10,8 @@ export const verifyStudent = async (data) => {
       date_of_birth: data.dateOfBirth,
       g12_exam_id: data.g12ExamId || undefined
     };
-    // console.log('Sending to backend:', payload);
-    const response = await axios.post(`${API_BASE_URL}/verify-admitted`, payload);
+    console.log('Making request to:', '/api/auth/verify-admitted');
+    const response = await axios.post('/api/auth/verify-admitted', payload);
     return response.data;
   } catch (error) {
     console.error('API Error:', error.response?.data || error.message);
@@ -20,12 +19,22 @@ export const verifyStudent = async (data) => {
   }
 };
 
-
 export const setStudentPassword = async (data) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/set-password`, data);
+    const response = await axios.post('/api/auth/set-password', data);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Password setup failed" };
+  }
+};
+
+export const loginStudent = async (data) => {
+  try {
+    const response = await axios.post('/api/auth/login', data);
+    return response.data;
+  } catch (error) {
+  
+    const errorMessage = error.response?.data?.message || error.message || "Login failed";
+    throw new Error(errorMessage);
   }
 };

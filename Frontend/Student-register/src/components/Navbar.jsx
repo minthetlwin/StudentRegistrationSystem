@@ -11,20 +11,17 @@ export default function Navbar() {
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/results" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
-              အောင်စာရင်း
-            </Link>
             <Link to="/register" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
               ဖောင်တင်ရန်
             </Link>
             <Link to="/help" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
               အကူအညီ
             </Link>
-            <Link to="/about" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
-              About Us
-            </Link>
             <Link to="/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
               Log in 
+            </Link>
+            <Link to="/admin-login" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
+              Admin
             </Link>
           </div>
 

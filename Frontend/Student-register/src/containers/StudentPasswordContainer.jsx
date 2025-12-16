@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import StudentVerifyForm from "../components/StudentVerifyForm.jsx";
-import StudentPasswordForm from "../components/SetPasswordForm.jsx";
+import StudentVerifyForm from "../components/authComponents/StudentVerifyForm.jsx";
+import StudentPasswordForm from "../components/authComponents/SetPasswordForm.jsx";
 import { verifyStudent, setStudentPassword } from "../services/authServices";
 import { useNavigate } from "react-router-dom";
 
@@ -53,7 +53,7 @@ export default function StudentPasswordContainer() {
         enrollment_number: student.enrollment_number, 
         date_of_birth: student.date_of_birth 
       };
-      console.log('Setting password with payload:', payload);
+      // console.log('Setting password with payload:', payload);
       
       const result = await setStudentPassword(payload);
       if (result.success) {

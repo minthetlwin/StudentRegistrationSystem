@@ -1,0 +1,48 @@
+
+services:
+  backend:
+    build: ./Backend
+    container_name: backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    volumes:
+      - ./Backend:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+
+
+  frontend:
+    build: ./Frontend/Student-register
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./Frontend/Student-register/.env
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    volumes:
+      - ./Frontend/Student-register:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: ["npm", "run", "dev"]
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

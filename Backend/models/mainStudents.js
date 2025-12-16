@@ -7,10 +7,11 @@ const studentSchema = new mongoose.Schema({
     date_of_birth: { type: Date, required: true },
     full_name: { type: String, required: true },
     password: { type: String }, // HASHED
-  program: { type: String },
-  admission_year: { type: String },
-  current_year: { type: Number, default: 1 }, // 1 = Fresher
-  status: { type: String, enum: ["REGISTERED", "BLOCKED"], default: "REGISTERED" }
+    role: { type: String, enum: ["student"], default: "student"},
+    program: { type: String },
+    admission_year: { type: String },
+    current_year: { type: Number, default: 1 }, // 1 = Fresher
+    status: { type: String, enum: ["REGISTERED", "BLOCKED"], default: "REGISTERED" }
 }, { timestamps: true });
 
 export const Students = mongoose.model("Students", studentSchema);
