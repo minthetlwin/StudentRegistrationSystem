@@ -2,51 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../components/Dashboard';
 
+
 export default function DashboardContainer() {
-  const [student, setStudent] = useState(null);
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is authenticated
     const token = localStorage.getItem('token');
-    const studentData = localStorage.getItem('student');
+    const userDate = localStorage.getItem('user');
+    const storedRole = localStorage.getItem('role');
 
-    if (!token || !studentData) {
-      // Redirect to login if not authenticated
+    if (!token || !userDate || !storedRole) {
       navigate('/login');
       return;
     }
 
-    try {
-      // Parse student data from localStorage
-      const parsedStudent = JSON.parse(studentData);
-      setStudent(parsedStudent);
-    } catch (error) {
-      console.error('Error parsing student data:', error);
-      // Clear invalid data and redirect to login
-      localStorage.removeItem('token');
-      localStorage.removeItem('student');
-      navigate('/login');
-    } finally {
-      setLoading(false);
-    }
+    setUser(JSON.parse(userDate));
+    setRole(storedRole);
+    setLoading(false);
   }, [navigate]);
 
   const handleLogout = () => {
-    // Clear authentication data
+    localStorage.removeItem('user');
     localStorage.removeItem('token');
-    localStorage.removeItem('student');
-    
-    // Redirect to login
+    localStorage.removeItem('role');
     navigate('/login');
   };
 
   return (
-    <Dashboard 
-      student={student} 
-      onLogout={handleLogout} 
-      loading={loading} 
+    <Dashboard
+      user={user}
+      role={role}
+      loading={loading}
+      onLogout={handleLogout}
     />
   );
 }

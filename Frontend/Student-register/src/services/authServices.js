@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = '';
-console.log('🔗 Using proxy for API calls');
+// const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export const verifyStudent = async (data) => {
   try {
@@ -34,7 +33,7 @@ export const loginStudent = async (data) => {
     const response = await axios.post('/api/auth/login', data);
     return response.data;
   } catch (error) {
-    console.error('Login Error:', error);
+  
     const errorMessage = error.response?.data?.message || error.message || "Login failed";
     throw new Error(errorMessage);
   }

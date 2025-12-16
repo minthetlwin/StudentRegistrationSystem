@@ -1,6 +1,7 @@
 import { AdmittedStudents } from "../models/admittedStudents.js";
 import { Students } from "../models/mainStudents.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export const verifyAdmittedStudent = async (req, res) => {
   try {
@@ -122,6 +123,7 @@ export const setStudentPassword = async (req, res) => {
       full_name: admittedStudent.full_name,
       date_of_birth: admittedStudent.date_of_birth,
       program: admittedStudent.program,
+      role : "student",
       admission_year: admittedStudent.admission_year,
       g12_exam_id: admittedStudent.g12_exam_id,
       password: hashedPassword,
@@ -149,7 +151,7 @@ export const loginStudent = async (req, res) => {
     // Find student by BOTH enrollment + NRC
     const student = await Students.findOne({ 
       enrollment_number,
-      nrc
+      nrc,
     });
 
     if (!student) {
@@ -167,9 +169,10 @@ export const loginStudent = async (req, res) => {
     const token = jwt.sign(
       { 
         studentId: student._id, 
-        enrollment_number: student.enrollment_number 
+        enrollment_number: student.enrollment_number,
+        role: student.role || 'student'
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: "7d" }
     );
 
@@ -179,7 +182,8 @@ export const loginStudent = async (req, res) => {
     res.json({
       success: true,
       message: "Login successful",
-      student: studentData,
+      user: studentData,
+      role: "student",
       token
     });
 

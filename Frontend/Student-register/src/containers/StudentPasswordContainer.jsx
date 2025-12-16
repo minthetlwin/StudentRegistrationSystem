@@ -53,7 +53,7 @@ export default function StudentPasswordContainer() {
         enrollment_number: student.enrollment_number, 
         date_of_birth: student.date_of_birth 
       };
-      console.log('Setting password with payload:', payload);
+      // console.log('Setting password with payload:', payload);
       
       const result = await setStudentPassword(payload);
       if (result.success) {

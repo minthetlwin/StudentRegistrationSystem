@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginForm from '../components/authComponents/LoginForm';
-import { loginStudent } from '../services/authServices';
+import LoginForm from '../components/adminComponents/adminLogin';
+import { loginAdmin } from '../services/adminServices';
 
 export default function LoginContainer() {
   const [loading, setLoading] = useState(false);
@@ -13,20 +13,13 @@ export default function LoginContainer() {
     setMessage('');
     
     try {
-      const result = await loginStudent(data);
-      console.log('Login result:', result);
+      const result = await loginAdmin(data);
       
-      if (result.success) {
-        // Store user data in localStorage
+      if (result.success || result.token) {
+        // Store user data in localStorage with keys that DashboardContainer expects
         localStorage.setItem('user', JSON.stringify(result.user));
         localStorage.setItem('token', result.token);
-        localStorage.setItem('role', result.role || result.user.role || 'student');
-        
-        // console.log('Stored in localStorage:', {
-        //   student: result.student,
-        //   token: !!result.token,
-        //   role: result.role || result.student.role
-        // });
+        localStorage.setItem('role', result.user.role);
         
         setMessage('✓ Login successful! Redirecting...');
         

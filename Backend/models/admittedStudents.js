@@ -9,6 +9,7 @@ const admittedStudentSchema = new mongoose.Schema({
   program: { type: String, required: true },
   admission_year: { type: String, required: true },
   password: { type: String },
+  role: { type: String, enum: ["student"],default: "student"},
   status: { type: String, enum: ["PENDING", "REGISTERED"], default: "PENDING" }
 }, { timestamps: true });
 

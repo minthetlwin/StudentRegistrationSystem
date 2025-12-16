@@ -20,6 +20,9 @@ export default function Navbar() {
             <Link to="/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
               Log in 
             </Link>
+            <Link to="/admin-login" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
+              Admin
+            </Link>
           </div>
 
           <div className="md:hidden">
