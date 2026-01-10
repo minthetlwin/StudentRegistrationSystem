@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Profile from './dashboardComponents/Profile';
+import DormRegistrationContainer from '../containers/DormRegistrationContainer';
+import DormRegisterList from './adminComponents/DormRegisterList';
 
 export default function Dashboard({
   user,
@@ -54,6 +56,11 @@ const adminItems = [
     id: 'admins',
     label: 'Admins',
     icon: 'M16.5 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM3.75 20.25a6.75 6.75 0 0113.5 0'
+  },
+  {
+    id: 'dorms',
+    label: 'Dorms',
+    icon: 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25'
   }
 ];
 
@@ -111,6 +118,13 @@ const adminItems = [
       <div className="flex-1 p-6">
         {activeSection === 'profile' && (
           <Profile user={user} role={role} />
+        )}
+        
+        {activeSection === 'forms' && (
+          <DormRegistrationContainer user={user} role={role} />
+        )}
+        {activeSection === 'dorms' && (
+          <DormRegisterList user={user} role={role} />
         )}
       </div>
     </div>

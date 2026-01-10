@@ -1,5 +1,5 @@
 import { AdmittedStudents } from "../models/admittedStudents.js";
-import { Students } from "../models/mainStudents.js";
+import  Students  from "../models/mainStudents.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 

@@ -14,4 +14,4 @@ const studentSchema = new mongoose.Schema({
     status: { type: String, enum: ["REGISTERED", "BLOCKED"], default: "REGISTERED" }
 }, { timestamps: true });
 
-export const Students = mongoose.model("Students", studentSchema);
+export default  mongoose.model("Students", studentSchema);

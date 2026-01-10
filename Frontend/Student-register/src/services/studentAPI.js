@@ -22,3 +22,14 @@ export const fetchNotifications = async () => {
   });
   return res.data.notifications;
 };
+
+export const registerForDorm = async (data) => {
+  try {
+    const response = await axios.post('/api/student/dorm/register', data, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Dorm registration failed" };
+  }
+};

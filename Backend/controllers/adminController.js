@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import adminUser from "../models/adminUser.js";
+import Semester from "../models/semesterUni.js";
+import DormRegistration from "../models/dormRegistration.js";
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -123,5 +125,48 @@ export const addAdmin = async (req, res) => {
       success: false,
       message: 'Server error'
     });
+  }
+};
+
+export const addSemester = async (req, res) => {
+  try {
+    const { name, academicYear, isActive, startDate, endDate } = req.body;
+
+    if (!name || !academicYear || !startDate || !endDate) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const semester = await Semester.create({
+      name,
+      academicYear,
+      isActive: isActive || false,
+      startDate,
+      endDate
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Semester created successfully',
+      data: semester
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getDormRegistrations = async (req, res) => {
+  try {
+    const registrations = await DormRegistration.find()
+      .populate('student', 'full_name enrollment_number g12_exam_id')
+      .populate('semester', 'name academicYear')
+      .populate('reviewedBy', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: registrations
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import Students from "../models/studentModel.js";
+import Students from "../models/mainStudents.js";
 
 
 export const protectStudent = async (req, res, next) => {

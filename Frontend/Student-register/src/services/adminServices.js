@@ -23,3 +23,23 @@ export const createAdmin = async (data) => {
     throw new Error(errorMessage);
   }
 }
+
+export const createSemester = async (data) => {
+  try {
+    const response = await axios.post('/api/admin/add-semester', data);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || error.message || "Failed to create semester";
+    throw new Error(errorMessage);
+  }
+}
+
+export const getDormRegistrations = async () => {
+  try {
+    const response = await axios.get('/api/admin/dorm-registrations');
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || error.message || "Failed to fetch dorm registrations";
+    throw new Error(errorMessage);
+  }
+}
