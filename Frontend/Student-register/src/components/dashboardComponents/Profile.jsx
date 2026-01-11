@@ -1,13 +1,30 @@
 import React, { useState } from 'react';
 import AddAdmin from '../adminComponents/addAdmin';
+import AddSemester from '../adminComponents/addSemester';
+
+
+
 export default function Profile({ user }) {
   const [activeTab, setActiveTab] = useState('info');
 
   const tabs = [
     { id: 'info', label: 'Personal Info', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
     { id: 'password', label: 'Change Password', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' },
-     { id: 'addadmin',  label: 'Add Admin',  icon: 'M18 9v6m3-3h-6M15 20h5v-2a4 4 0 00-4-4h-1M9 12a4 4 0 110-8 4 4 0 010 8zM3 20v-2a4 4 0 014-4h4'} 
+     { id: 'addadmin',  label: 'Add Admin',  icon: 'M18 9v6m3-3h-6M15 20h5v-2a4 4 0 00-4-4h-1M9 12a4 4 0 110-8 4 4 0 010 8zM3 20v-2a4 4 0 014-4h4'} ,
+     { id: 'addsemester',  label: 'Add Semester',   icon: 'M12 4v16m8-8H4M7 2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2zM7 8h10'} 
  ];
+
+
+ const roleTabsMap = {
+  student: ['info', 'password'],
+  admin: ['info', 'password','addsemester'],
+  superadmin: ['info', 'password', 'addadmin' ,'addsemester']
+};
+
+const Alltabs = tabs.filter(tab =>
+  roleTabsMap[user?.role]?.includes(tab.id)
+);
+
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -36,7 +53,7 @@ export default function Profile({ user }) {
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8 px-8">
-          {tabs.map((tab) => (
+          {Alltabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -102,6 +119,9 @@ export default function Profile({ user }) {
 
         {activeTab === 'addadmin' && user?.role ==="superadmin" &&  (
              <AddAdmin/>
+        )}
+        {activeTab === 'addsemester' && user?.role ==="superadmin" &&  (
+             <AddSemester/>
         )}
 
       </div>
