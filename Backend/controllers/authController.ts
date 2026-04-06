@@ -1,4 +1,4 @@
-import { AdmittedStudents } from "../models/admittedStudents.js";
+import AdmittedStudents  from "../models/admittedStudents.js";
 import  Students  from "../models/mainStudents.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -14,24 +14,35 @@ export const verifyAdmittedStudent = async (req, res) => {
       });
     }
 
-    console.log('Verifying student:', { enrollment_number, nrc, date_of_birth });
+    // Search in AdmittedStudents first
+    let student = await AdmittedStudents.findOne({ nrc, enrollment_number });
+    let isTransferStudent = false;
 
-    //  Search in AdmittedStudents
-    const admittedStudent = await AdmittedStudents.findOne({
-      nrc,
-      enrollment_number
-    });
+    // If not found, check CurrentStudents (for transfer students without password)
+    if (!student) {
+      student = await Students.findOne({ nrc, enrollment_number });
+      
+      if (student) {
+        if (student.password) {
+          return res.status(400).json({
+            success: false,
+            message: "Account already created. Please login."
+          });
+        }
+        isTransferStudent = true;
+      }
+    }
 
-    if (!admittedStudent) {
+    if (!student) {
       return res.status(404).json({
         success: false,
-        message: "Student not found in admitted records"
+        message: "Student not found in records"
       });
     }
 
-    //  Validate DOB
+    // Validate DOB
     const inputDate = new Date(date_of_birth).toISOString().split("T")[0];
-    const storedDate = new Date(admittedStudent.date_of_birth).toISOString().split("T")[0];
+    const storedDate = new Date(student.date_of_birth).toISOString().split("T")[0];
 
     if (inputDate !== storedDate) {
       return res.status(400).json({
@@ -41,53 +52,36 @@ export const verifyAdmittedStudent = async (req, res) => {
     }
 
     // Optional G12 check
-    if (g12_exam_id && admittedStudent.g12_exam_id !== g12_exam_id) {
+    if (g12_exam_id && student.g12_exam_id !== g12_exam_id) {
       return res.status(400).json({
         success: false,
         message: "G12 exam ID does not match"
       });
     }
 
-    //  Ensure they didn’t create account already
-    const existingStudent = await Students.findOne({
-      enrollment_number,
-      nrc
-    });
-
-    if (existingStudent) {
-      return res.status(400).json({
-        success: false,
-        message: "Account already created. Please login."
-      });
-    }
-
-    //  Prepare response
+    // Prepare response
     const responseData = {
       success: true,
       message: "Student verified successfully",
       student: {
-        nrc: admittedStudent.nrc,
-        enrollment_number: admittedStudent.enrollment_number,
-        date_of_birth: admittedStudent.date_of_birth,
-        full_name: admittedStudent.full_name,
-        g12_exam_id: admittedStudent.g12_exam_id
+        nrc: student.nrc,
+        enrollment_number: student.enrollment_number,
+        date_of_birth: student.date_of_birth,
+        full_name: student.full_name,
+        g12_exam_id: student.g12_exam_id,
+        isTransferStudent
       }
     };
 
-    console.log('Student verified successfully:', responseData.student.enrollment_number);
-
     return res.status(200).json(responseData);
 
-  } catch (error) {
-    console.error("VERIFY ERROR:", error);
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       message: "Server error"
     });
   }
 };
-
-
 
 export const setStudentPassword = async (req, res) => {
   try {
@@ -101,17 +95,30 @@ export const setStudentPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: "Passwords do not match" });
     }
 
-    // Find the admitted student first
+    // Check if student exists in CurrentStudents (transfer student)
+    const currentStudent = await Students.findOne({ enrollment_number, nrc });
+    
+    if (currentStudent) {
+      if (currentStudent.password) {
+        return res.status(400).json({ success: false, message: "Password already set. Please login." });
+      }
+
+      const hashedPassword = await bcrypt.hash(new_password, 10);
+      currentStudent.password = hashedPassword;
+      await currentStudent.save();
+
+      return res.json({ success: true, message: "Password set successfully" });
+    }
+
+    // Check AdmittedStudents (new student)
     const admittedStudent = await AdmittedStudents.findOne({ enrollment_number, nrc });
 
     if (!admittedStudent) {
-      return res.status(404).json({ success: false, message: "Admitted student not found" });
+      return res.status(404).json({ success: false, message: "Student not found" });
     }
 
-    // Check if student already exists in Students collection
-    const existingStudent = await Students.findOne({ enrollment_number });
-    if (existingStudent) {
-      return res.status(400).json({ success: false, message: "Password already set. Please login." });
+    if (!admittedStudent.g12_exam_id) {
+      return res.status(400).json({ success: false, message: "G12 exam ID is missing in student record" });
     }
 
     const hashedPassword = await bcrypt.hash(new_password, 10);
@@ -123,7 +130,7 @@ export const setStudentPassword = async (req, res) => {
       full_name: admittedStudent.full_name,
       date_of_birth: admittedStudent.date_of_birth,
       program: admittedStudent.program,
-      role : "student",
+      role: "student",
       admission_year: admittedStudent.admission_year,
       g12_exam_id: admittedStudent.g12_exam_id,
       password: hashedPassword,
@@ -132,11 +139,13 @@ export const setStudentPassword = async (req, res) => {
 
     await student.save();
 
+    // Delete from AdmittedStudents
+    await AdmittedStudents.findByIdAndDelete(admittedStudent._id);
+
     res.json({ success: true, message: "Password set successfully" });
 
-  } catch (error) {
-    console.error("Set Password Error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message || "Server error" });
   }
 };
 
@@ -159,7 +168,7 @@ export const loginStudent = async (req, res) => {
     }
 
     // Validate password
-    const isPasswordValid = await bcrypt.compare(password, student.password);
+    const isPasswordValid = await bcrypt.compare(password, student.password as string);
 
     if (!isPasswordValid) {
       return res.status(401).json({ success: false, message: "Invalid password" });
@@ -187,8 +196,7 @@ export const loginStudent = async (req, res) => {
       token
     });
 
-  } catch (error) {
-    console.error("Login Error:", error);
+  } catch (error: any) {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

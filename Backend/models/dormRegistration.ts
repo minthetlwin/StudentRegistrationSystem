@@ -40,17 +40,22 @@ const DormRegistrationSchema = new mongoose.Schema({
 
   reviewedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "AdminUser",
   },
 
   reviewedAt: Date,
+
+  version: {
+    type: Number,
+    default: 0
+  },
 
   //future property for handling
  payment: {
   required: { type: Boolean, default: false },
   paid: { type: Boolean, default: false },
   paidAt: { type: Date },
-},
+}, 
 
 
 }, { timestamps: true });

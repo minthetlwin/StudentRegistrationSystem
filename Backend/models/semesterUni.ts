@@ -10,7 +10,7 @@ const SemesterSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Automatically deactivate if end date has passed
-SemesterSchema.pre('save', function(next) {
+SemesterSchema.pre('save', function(this: any, next: any) {
   if (this.endDate < new Date()) {
     this.isActive = false;
   }

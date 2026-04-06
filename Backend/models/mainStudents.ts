@@ -8,7 +8,7 @@ const studentSchema = new mongoose.Schema({
     full_name: { type: String, required: true },
     password: { type: String }, // HASHED
     role: { type: String, enum: ["student"], default: "student"},
-    program: { type: String },
+    program: { type: String, enum: ["CS", "CT","none"], default: "none"},
     admission_year: { type: String },
     current_year: { type: Number, default: 1 }, // 1 = Fresher
     status: { type: String, enum: ["REGISTERED", "BLOCKED"], default: "REGISTERED" }

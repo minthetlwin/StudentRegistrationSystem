@@ -1,86 +1,117 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
+import { UserCheck, Hash, CreditCard, Calendar, ClipboardCheck } from "lucide-react";
 
 export default function StudentVerifyForm({ onVerify }) {
   const { register, handleSubmit, formState: { errors ,isSubmitting } } = useForm();
 
   const onValid = (data) => {
-    console.log('Form data:', data);
     if (onVerify) {
       onVerify(data);
     }
   };
   
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-2">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl h-fit max-h-[90vh] overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">ကျောင်းသား အကောင့် ဖန်တီးခြင်း</h2>
-          
-          <form onSubmit={handleSubmit(onValid)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+    <div className="min-h-[calc(100vh-64px)] w-full flex items-center justify-center p-4 bg-[#f8fafc]">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="glass-card w-full max-w-2xl p-8 md:p-12 rounded-3xl"
+      >
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+            <UserCheck className="w-8 h-8 text-indigo-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">ကျောင်းသား အကောင့် စစ်ဆေးခြင်း</h2>
+          <p className="text-slate-500 text-sm">ကျောင်းသားအချက်အလက်များကို ဖြည့်သွင်း၍ စစ်ဆေးပေးပါ</p>
+        </div>
+        
+        <form onSubmit={handleSubmit(onValid)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Enrollment Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ကျောင်းဝင်ခွင့်နံပတ်</label>
-              <input
-                {...register("admissionNumber", { required: "လိုအပ်သည်" })}
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                placeholder="ကျောင်းဝင်ခွင့်နံပတ်"
-              />
-              {errors.admissionNumber && <p className="mt-1 text-xs text-red-600">{errors.admissionNumber.message}</p>}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">ကျောင်းဝင်ခွင့်နံပတ်</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Hash className="w-4 h-4" />
+                </div>
+                <input
+                  {...register("admissionNumber", { required: "လိုအပ်သည်" })}
+                  type="text"
+                  className="input-field pl-11"
+                  placeholder="Admission ID"
+                />
+              </div>
+              {errors.admissionNumber && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.admissionNumber.message}</p>}
             </div>
 
             {/* NRC Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">မှတ်ပုံတင်နံပတ်</label>
-              <input
-                {...register("nrcNumber", { required: "လိုအပ်သည်" })}
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                placeholder="မှတ်ပုံတင်နံပတ်"
-              />
-              {errors.nrcNumber && <p className="mt-1 text-xs text-red-600">{errors.nrcNumber.message}</p>}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">မှတ်ပုံတင်နံပတ်</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <input
+                  {...register("nrcNumber", { required: "လိုအပ်သည်" })}
+                  type="text"
+                  className="input-field pl-11"
+                  placeholder="12/ABC(N)123456"
+                />
+              </div>
+              {errors.nrcNumber && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.nrcNumber.message}</p>}
             </div>
 
             {/* Date of Birth */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">မွေးသက္ကရာဇ်</label>
-              <input
-                {...register("dateOfBirth", { required: "လိုအပ်သည်" })}
-                type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              />
-              {errors.dateOfBirth && <p className="mt-1 text-xs text-red-600">{errors.dateOfBirth.message}</p>}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">မွေးသက္ကရာဇ်</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Calendar className="w-4 h-4" />
+                </div>
+                <input
+                  {...register("dateOfBirth", { required: "လိုအပ်သည်" })}
+                  type="date"
+                  className="input-field pl-11"
+                />
+              </div>
+              {errors.dateOfBirth && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.dateOfBirth.message}</p>}
             </div>
 
             {/* G12 Exam ID */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">G12 Exam ID </label>
-              <input
-                {...register("g12ExamId")}
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                placeholder="G12 Exam ID"
-              />
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">G12 Exam ID </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <ClipboardCheck className="w-4 h-4" />
+                </div>
+                <input
+                  {...register("g12ExamId")}
+                  type="text"
+                  className="input-field pl-11"
+                  placeholder="Exam ID (Optional)"
+                />
+              </div>
             </div>
+          </div>
 
-
-
-            {/* Submit Button */}
-            <div className="md:col-span-2 pt-4 ">
-              <button
-                type="submit"
-                className="w-full letter-spacing-wide bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
+          <motion.div 
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className="pt-4"
+          >
+            <button
+              type="submit"
+              className="btn-primary w-full py-4 text-base font-bold shadow-lg shadow-indigo-100"
               disabled={isSubmitting}
             >
-               Verify Student
-              </button>
-            </div>
-
-          </form>
-        </div>
-      </div>
+              {isSubmitting ? 'Verifying...' : 'Verify Student'}
+            </button>
+          </motion.div>
+        </form>
+      </motion.div>
     </div>
   );
 }
+

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { UserPlus, UserCheck, ArrowRight } from "lucide-react";
 
 export default function StudentTypeSelector({ onSelect }) {
   const [selected, setSelected] = useState("");
@@ -9,53 +11,58 @@ export default function StudentTypeSelector({ onSelect }) {
   };
 
   return (
-    <div className=" bg-white flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
-        <div className="text-center mb-12">
-          {/* <h1 className="text-4xl font-light text-gray-900 mb-3">Choose Your Path</h1> */}
-          <p className="text-gray-500 text-lg">ဖောင်တင်ရန် ရွေးချယ်ပါ</p>
+    <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-6 bg-[#f8fafc]">
+      <div className="w-full max-w-2xl">
+        <div className="text-center mb-12 space-y-4">
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">ဖောင်တင်ရန် ရွေးချယ်ပါ</h1>
+          <p className="text-slate-500 max-w-sm mx-auto">ကျောင်းသားအမျိုးအစားကို ရွေးချယ်၍ ဆက်လက်လုပ်ဆောင်ပါ</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <button
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.button
+            whileHover={{ y: -8 }}
             onClick={() => handleSelect("new")}
-            className={`group relative p-8 rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
+            className={`group relative p-10 rounded-3xl border-2 transition-all duration-300 text-left h-full flex flex-col ${
               selected === "new" 
-                ? "border-blue-500 bg-blue-50 shadow-lg" 
-                : "border-gray-200 hover:border-blue-300 hover:shadow-md"
+                ? "border-indigo-600 bg-indigo-50/50 shadow-xl shadow-indigo-100" 
+                : "border-slate-200 bg-white hover:border-indigo-200 hover:shadow-lg"
             }`}
           >
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">ကျောင်းသားသစ်</h3>
-              <p className="text-gray-500 text-sm">New Student</p>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-colors ${
+              selected === "new" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+            }`}>
+              <UserPlus className="w-7 h-7" />
             </div>
-          </button>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">ကျောင်းသားသစ်</h3>
+            <p className="text-slate-500 text-sm mb-8 flex-grow">New Student Registration</p>
+            <div className="flex items-center text-indigo-600 font-bold text-sm">
+              ရွေးချယ်မည် <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ y: -8 }}
             onClick={() => handleSelect("old")}
-            className={`group relative p-8 rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
+            className={`group relative p-10 rounded-3xl border-2 transition-all duration-300 text-left h-full flex flex-col ${
               selected === "old" 
-                ? "border-green-500 bg-green-50 shadow-lg" 
-                : "border-gray-200 hover:border-green-300 hover:shadow-md"
+                ? "border-indigo-600 bg-indigo-50/50 shadow-xl shadow-indigo-100" 
+                : "border-slate-200 bg-white hover:border-indigo-200 hover:shadow-lg"
             }`}
           >
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">ကျောင်းသားဟောင်း</h3>
-              <p className="text-gray-500 text-sm">Existing Student</p>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-colors ${
+              selected === "old" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+            }`}>
+              <UserCheck className="w-7 h-7" />
             </div>
-          </button>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">ကျောင်းသားဟောင်း</h3>
+            <p className="text-slate-500 text-sm mb-8 flex-grow">Existing Student Registration</p>
+            <div className="flex items-center text-indigo-600 font-bold text-sm">
+              ရွေးချယ်မည် <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </motion.button>
         </div>
       </div>
     </div>
   );
 }
+

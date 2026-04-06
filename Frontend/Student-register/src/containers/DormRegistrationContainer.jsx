@@ -8,14 +8,12 @@ export default function DormRegistrationContainer() {
   const [shouldReset, setShouldReset] = useState(false);
 
   const handleDormRegistration = async (data) => {
-    console.log('Container received data:', data);
     setLoading(true);
     setMessage('');
     setShouldReset(false);
     
     try {
       const result = await registerForDorm(data);
-      console.log('Dorm registration result:', result);
       
       if (result.success) {
         setMessage('✓ ' + (result.message || 'Dorm registration submitted successfully!'));
@@ -24,7 +22,6 @@ export default function DormRegistrationContainer() {
         setMessage('✗ ' + (result.message || 'Registration failed'));
       }
     } catch (error) {
-      console.error('Dorm registration error:', error);
       setMessage('✗ ' + (error.message || 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);

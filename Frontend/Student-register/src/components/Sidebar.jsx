@@ -1,8 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Home, FileText, BarChart3, LogOut, ChevronRight } from 'lucide-react';
 
 export default function Sidebar({ activeSection, setActiveSection }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem('student');
@@ -11,77 +14,64 @@ export default function Sidebar({ activeSection, setActiveSection }) {
   };
 
   const menuItems = [
-    { id: 'home', label: 'Home', icon: HomeIcon },
-    { id: 'forms', label: 'Forms', icon: DocumentIcon },
-    { id: 'results', label: 'Results', icon: ChartIcon },
+    { id: 'home', label: 'Home', icon: Home },
+    { id: 'forms', label: 'Forms', icon: FileText },
+    { id: 'results', label: 'Results', icon: BarChart3 },
   ];
 
   return (
-    <div className="w-64 bg-white shadow-lg flex flex-col">
-      <div className="p-6 border-b">
-        <h2 className="text-xl font-bold text-gray-800">Student Portal</h2>
+    <div className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0">
+      <div className="p-8">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
+            <span className="text-white font-bold text-xl">S</span>
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 leading-tight">Student</h2>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Portal</p>
+          </div>
+        </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 px-4 space-y-1.5">
+        <p className="px-4 text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+          Main Menu
+        </p>
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveSection(item.id)}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+            className={`w-full flex items-center justify-between group px-4 py-3 rounded-xl transition-all duration-200 ${
               activeSection === item.id
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'bg-indigo-50 text-indigo-600 shadow-sm'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
-            <item.icon className="w-5 h-5" />
-            <span className="font-medium">{item.label}</span>
+            <div className="flex items-center space-x-3">
+              <item.icon className={`w-5 h-5 transition-colors ${
+                activeSection === item.id ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-900'
+              }`} />
+              <span className="font-medium text-sm">{item.label}</span>
+            </div>
+            {activeSection === item.id && (
+              <motion.div layoutId="active-indicator">
+                <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+              </motion.div>
+            )}
           </button>
         ))}
       </nav>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-slate-100">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all duration-200 group"
         >
-          <LogoutIcon className="w-5 h-5" />
-          <span className="font-medium">Logout</span>
+          <LogOut className="w-5 h-5 text-slate-400 group-hover:text-rose-600 transition-colors" />
+          <span className="font-medium text-sm">Logout</span>
         </button>
       </div>
     </div>
   );
 }
 
-function HomeIcon({ className }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-  );
-}
-
-
-
-function DocumentIcon({ className }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-  );
-}
-
-function ChartIcon({ className }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    </svg>
-  );
-}
-
-function LogoutIcon({ className }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-  );
-}

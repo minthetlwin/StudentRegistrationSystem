@@ -1,11 +1,11 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 
 let redis;
 
 try {
   redis = new Redis({
     host: process.env.REDIS_HOST || "127.0.0.1",
-    port: process.env.REDIS_PORT || 6379,
+    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379,
 
     retryStrategy(times) {
       const delay = Math.min(times * 500, 2000);
@@ -22,7 +22,7 @@ try {
     console.error(" Redis error:", err.message);
   });
 
-} catch (err) {
+} catch (err: any) {
   console.log(" Redis initialization failed:", err.message);
   redis = null;
 }

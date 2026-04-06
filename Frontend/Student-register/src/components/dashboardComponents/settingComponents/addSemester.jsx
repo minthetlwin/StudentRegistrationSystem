@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createSemester } from "../../services/adminServices";
+import { createSemester } from "../../../services/adminServices";
 
 export default function AddSemester() {
   const [formData, setFormData] = useState({
@@ -143,8 +143,9 @@ export default function AddSemester() {
             name="isActive"
             checked={formData.isActive}
             onChange={handleChange}
+            className="hidden"
           />
-          <span>Set as Active Semester</span>
+          <span></span>
         </label>
       </div>
 
