@@ -5,6 +5,9 @@ services:
     container_name: backend
     ports:
       - "5000:5000"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     env_file:
       - ./Backend/.env
     depends_on:
@@ -14,6 +17,8 @@ services:
     volumes:
       - ./Backend:/app
       - /app/node_modules
+    environment:
+      - NODE_ENV=development
     command: ["npm", "run", "dev"]
 
 
@@ -33,6 +38,7 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - VITE_HMR_PORT=5173
     command: ["npm", "run", "dev"]
 
   redis:

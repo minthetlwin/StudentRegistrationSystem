@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const API_BASE_URL = '';
-console.log('🔗 Using proxy for API calls');
 
 
 const getAuthHeaders = () => {
@@ -31,5 +30,27 @@ export const registerForDorm = async (data) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Dorm registration failed" };
+  }
+};
+
+
+export const studentList = async (data) =>{
+  try{
+    const response = await axios.get('/api/student/list',data,{
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Fetching student list failed" };
+  }     
+};
+export const registerStudent = async (registrationData) => {
+  try {
+    const response = await axios.post('/api/student/register', registrationData, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Student registration failed" };
   }
 };

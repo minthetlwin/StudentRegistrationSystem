@@ -6,14 +6,14 @@ const admittedStudentSchema = new mongoose.Schema({
   enrollment_number: { type: String, required: true, unique: true },
   full_name: { type: String, required: true },
   date_of_birth: { type: Date, required: true },
-  program: { type: String, required: true },
+  program: { type: String ,enum: ["CS", "CT" ,"none"], default: "none"},
   admission_year: { type: String, required: true },
   password: { type: String },
   role: { type: String, enum: ["student"],default: "student"},
   status: { type: String, enum: ["PENDING", "REGISTERED"], default: "PENDING" }
 }, { timestamps: true });
 
-export const AdmittedStudents = mongoose.model("AdmittedStudents", admittedStudentSchema);
+export default mongoose.model("AdmittedStudents", admittedStudentSchema);
 
 
 //this model only use for checking admitted students 

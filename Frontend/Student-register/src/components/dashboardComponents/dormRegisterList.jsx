@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { getDormRegistrations } from '../../services/adminServices';
+import { getDormRegistrations, updateDormStatus } from '../../services/adminServices';
+import { exportToExcel } from '../../utils/exportUtils';
+import ViewDetail from '../adminComponents/viewDetail';
+
 
 export default function DormRegisterList() {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedRegistration, setSelectedRegistration] = useState(null);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     fetchRegistrations();
@@ -36,6 +40,30 @@ export default function DormRegisterList() {
     setSelectedRegistration(registration);
   };
 
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      await updateDormStatus(selectedRegistration._id, {
+        status: newStatus,
+        version: selectedRegistration.version || 0
+      });
+
+      setMessage(`Registration ${newStatus.toLowerCase()} successfully!`);
+      setTimeout(() => setMessage(''), 3000);
+      closeModal();
+      fetchRegistrations();
+    } catch (error) {
+      if (error.message === 'Registration has been updated by another admin') {
+        setMessage('This registration has been updated by another admin. Please refresh.');
+        setTimeout(() => setMessage(''), 5000);
+        closeModal();
+        fetchRegistrations();
+      } else {
+        setMessage('Error updating status: ' + error.message);
+        setTimeout(() => setMessage(''), 5000);
+      }
+    }
+  };
+
   const closeModal = () => {
     setSelectedRegistration(null);
   };
@@ -55,10 +83,38 @@ export default function DormRegisterList() {
 
   return (
     <div className="space-y-6">
+      {message && (
+        <div
+          className={`p-3 rounded-lg text-sm border ${
+            message.includes('success')
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-700 border-red-200'
+          }`}
+        >
+          {message}
+        </div>
+      )}
+      
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-2xl font-semibold text-gray-900">Dorm Registrations</h2>
-          <p className="text-gray-600 mt-1">Manage student dormitory applications</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900">Dorm Registrations</h2>
+              <p className="text-gray-600 mt-1">Manage student dormitory applications</p>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => exportToExcel(registrations)}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export Excel
+              </button>
+            </div>
+          </div>
         </div>
         
         {registrations.length === 0 ? (
@@ -130,89 +186,15 @@ export default function DormRegisterList() {
         )}
       </div>
 
-      {/* Modal for viewing details */}
-      {selectedRegistration && (
-        <div className="fixed inset-0  bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-900">Registration Details</h3>
-                <button 
-                  onClick={closeModal} 
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <div className="px-6 py-4 space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Student Information</label>
-                  <p className="text-lg font-semibold text-gray-900">{selectedRegistration.student?.full_name}</p>
-                  <p className="text-sm text-gray-600">{selectedRegistration.student?.enrollment_number}</p>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                  <p className="text-gray-900">{selectedRegistration.semester?.name}</p>
-                  <p className="text-sm text-gray-600">{selectedRegistration.semester?.academicYear}</p>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                  <p className="text-gray-900">{selectedRegistration.address}</p>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Emergency Contact</label>
-                  <p className="text-gray-900">{selectedRegistration.emergencyContact}</p>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Accommodation</label>
-                  <p className="text-gray-900">{selectedRegistration.reason}</p>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedRegistration.status)}`}>
-                      {selectedRegistration.status}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Submitted</label>
-                    <p className="text-sm text-gray-600">
-                      {new Date(selectedRegistration.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 rounded-b-2xl">
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={closeModal}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ViewDetail
+        open={!!selectedRegistration}
+        onClose={closeModal}
+        studentData={selectedRegistration}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
+
+
+  </div>
   );
 }

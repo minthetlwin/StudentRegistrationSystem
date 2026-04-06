@@ -1,39 +1,93 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Menu, X, User, ShieldCheck, HelpCircle, FileText, LayoutDashboard } from 'lucide-react'
 
 export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false)
+  const location = useLocation()
+
+  const navLinks = [
+    { name: 'ဖောင်တင်ရန်', path: '/register', icon: FileText },
+    { name: 'အကူအညီ', path: '/help', icon: HelpCircle },
+    { name: 'Log in', path: '/login', icon: User },
+    { name: 'Admin', path: '/admin-login', icon: ShieldCheck },
+  ]
+
+  const isActive = (path) => location.pathname === path
+
   return (
-    <nav className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6">
+    <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-lg border-b border-slate-200/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-gray-900 text-lg font-semibold tracking-tight">Student Registration</Link>
+            <Link to="/" className="flex items-center space-x-2 group">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <span className="text-white font-bold text-xl">S</span>
+              </div>
+              <span className="text-slate-900 text-lg font-semibold tracking-tight">Portal</span>
+            </Link>
           </div>
           
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/register" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
-              ဖောင်တင်ရန်
-            </Link>
-            <Link to="/help" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
-              အကူအညီ
-            </Link>
-            <Link to="/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
-              Log in 
-            </Link>
-            <Link to="/admin-login" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
-              Admin
-            </Link>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  isActive(link.path)
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <link.icon className="w-4 h-4" />
+                <span>{link.name}</span>
+              </Link>
+            ))}
           </div>
 
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <button className="text-gray-600 hover:text-gray-900 p-2">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden border-t border-slate-100 bg-white"
+          >
+            <div className="px-4 py-3 space-y-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                    isActive(link.path)
+                      ? 'bg-indigo-50 text-indigo-600'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <link.icon className="w-5 h-5" />
+                  <span>{link.name}</span>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   )
 }

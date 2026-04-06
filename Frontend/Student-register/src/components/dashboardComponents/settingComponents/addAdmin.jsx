@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createAdmin } from "../../services/adminServices";
+import { createAdmin } from "../../../services/adminServices";
 
 export default function AddAdmin() {
   const [formData, setFormData] = useState({
