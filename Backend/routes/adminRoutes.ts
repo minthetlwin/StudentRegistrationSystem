@@ -16,7 +16,9 @@ import {
   getStudentRegistrations,
   updateStudentRegistrationStatus,
   getAllPayments,
-  updatePaymentStatus
+  updatePaymentStatus,
+  getPaymentSettings,
+  updatePaymentSettings
 } from "../controllers/adminController.js";
 import { protectAdmin } from "../middleware/authMiddleware.js";
 
@@ -48,5 +50,7 @@ router.post("/current-students", protectAdmin, addCurrentStudent);
 // Payment management
 router.get("/payments", protectAdmin, getAllPayments);
 router.put("/payments/:id/status", protectAdmin, updatePaymentStatus);
+router.get("/payments/settings", protectAdmin, getPaymentSettings);
+router.put("/payments/settings", protectAdmin, updatePaymentSettings);
 
 export default router;

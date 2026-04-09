@@ -5,7 +5,8 @@ import { getPaymentStatus, submitPayment } from "../services/studentAPI";
 export default function PaymentContainer() {
   const [loading, setLoading] = useState(true);
   const [paymentData, setPaymentData] = useState(null);
-  const [amountRequired, setAmountRequired] = useState(500000);
+  const [amountRequired, setAmountRequired] = useState(0);
+  const [feeBreakdown, setFeeBreakdown] = useState([]);
   const [error, setError] = useState("");
 
   const loadData = async () => {
@@ -14,8 +15,11 @@ export default function PaymentContainer() {
       const res = await getPaymentStatus();
       if (res.exists) {
         setPaymentData(res.data);
+        setAmountRequired(res.data.amountRequired || 0);
+        setFeeBreakdown(res.data.feeBreakdown || []);
       } else {
-        setAmountRequired(res.amountRequired || 500000);
+        setAmountRequired(res.amountRequired || 0);
+        setFeeBreakdown(res.feeBreakdown || []);
       }
     } catch (err) {
       setError(err?.message || "Failed to load payment information.");
@@ -57,6 +61,7 @@ export default function PaymentContainer() {
       <PaymentForm
         paymentData={paymentData}
         amountRequired={amountRequired}
+        feeBreakdown={feeBreakdown}
         onSubmit={handleSubmit}
         loading={loading}
       />

@@ -561,7 +561,7 @@ export const updateStudentRegistrationStatus = async (req: any, res: any) => {
       });
     }
 
-    // Create Notification for Student
+    // Create Notification and Payment for Student
     const recipientId = updated.student?._id || updated.student;
     if (recipientId) {
       await Notification.create({
@@ -571,6 +571,19 @@ export const updateStudentRegistrationStatus = async (req: any, res: any) => {
         type: status === 'APPROVED' ? 'SUCCESS' : status === 'REJECTED' ? 'ERROR' : 'INFO',
         link: '/dashboard',
       });
+
+      if (status === 'APPROVED') {
+        // Create an UNPAID payment invoice automatically if not exists
+        const existingPayment = await Payment.findOne({ student: recipientId });
+        if (!existingPayment) {
+          await Payment.create({
+            student: recipientId,
+            amountRequired: 0,
+            feeBreakdown: [],
+            status: 'UNPAID'
+          });
+        }
+      }
     }
 
     res.json({
@@ -648,3 +661,56 @@ export const updatePaymentStatus = async (req: any, res: any) => {
     });
   }
 };
+
+import PaymentSettings from "../models/paymentSettings.js";
+
+export const getPaymentSettings = async (req: any, res: any) => {
+  try {
+    let settings = await PaymentSettings.findOne();
+    if (!settings) {
+      settings = await PaymentSettings.create({
+        feeBreakdown: [],
+        totalAmountRequired: 0
+      });
+    }
+    res.json({
+      success: true,
+      data: settings
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updatePaymentSettings = async (req: any, res: any) => {
+  try {
+    const { feeBreakdown } = req.body;
+
+    if (!Array.isArray(feeBreakdown)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid fee breakdown array is required'
+      });
+    }
+
+    const totalAmountRequired = feeBreakdown.reduce((total, item) => total + (Number(item.amount) || 0), 0);
+
+    let settings = await PaymentSettings.findOne();
+    if (settings) {
+      settings.feeBreakdown = feeBreakdown;
+      settings.totalAmountRequired = totalAmountRequired;
+      await settings.save();
+    } else {
+      settings = await PaymentSettings.create({ feeBreakdown, totalAmountRequired });
+    }
+
+    res.json({
+      success: true,
+      message: 'Global payment settings updated successfully',
+      data: settings
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

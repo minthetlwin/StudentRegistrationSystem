@@ -159,14 +159,36 @@ export async function getMyRegistrationStatus(req: any, res: any) {
   }
 }
 
+import PaymentSettings from "../models/paymentSettings.js";
+
 export async function getPaymentStatus(req: any, res: any) {
   try {
     const studentId = req.student._id;
-    const payment = await Payment.findOne({ student: studentId });
-    if (!payment) {
-      return res.json({ exists: false, amountRequired: 500000 });
+    const payment = await Payment.findOne({ student: studentId }).populate("student", "full_name enrollment_number");
+    
+    // Always fetch global settings for the breakdown display
+    let settings = await PaymentSettings.findOne();
+    if (!settings) {
+      settings = { feeBreakdown: [], totalAmountRequired: 0 } as any;
     }
-    res.json({ exists: true, data: payment });
+
+    if (!payment) {
+      return res.json({ 
+        exists: false, 
+        amountRequired: settings.totalAmountRequired, 
+        feeBreakdown: settings.feeBreakdown 
+      });
+    }
+    
+    // If payment exists but it's UNPAID/PENDING without its own snapshot, or we just want to ensure it has the global data for rendering
+    res.json({ 
+      exists: true, 
+      data: {
+        ...payment.toObject(),
+        feeBreakdown: payment.feeBreakdown?.length ? payment.feeBreakdown : settings.feeBreakdown,
+        amountRequired: payment.amountRequired || settings.totalAmountRequired
+      } 
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -182,7 +204,7 @@ export async function submitPayment(req: any, res: any) {
     }
 
     const existingPayment = await Payment.findOne({ student: studentId });
-    if (existingPayment && existingPayment.status !== "REJECTED") {
+    if (existingPayment && existingPayment.status !== "REJECTED" && existingPayment.status !== "UNPAID") {
       return res.status(400).json({ success: false, message: "Payment already submitted or processing" });
     }
 
@@ -191,18 +213,28 @@ export async function submitPayment(req: any, res: any) {
       return res.status(400).json({ success: false, message: "Invalid image format" });
     }
 
+    let settings = await PaymentSettings.findOne();
+    if (!settings) settings = { feeBreakdown: [], totalAmountRequired: 0 } as any;
+
     let payment;
-    if (existingPayment && existingPayment.status === "REJECTED") {
+    if (existingPayment && (existingPayment.status === "REJECTED" || existingPayment.status === "UNPAID")) {
       payment = await Payment.findOneAndUpdate(
         { student: studentId },
-        { slip_image_url, status: "PENDING", adminRemark: "" },
+        { 
+          slip_image_url, 
+          status: "PENDING", 
+          adminRemark: "",
+          amountRequired: settings.totalAmountRequired,
+          feeBreakdown: settings.feeBreakdown
+        },
         { new: true }
       );
     } else {
       payment = await Payment.create({
         student: studentId,
         slip_image_url,
-        amountRequired: 500000,
+        amountRequired: settings.totalAmountRequired,
+        feeBreakdown: settings.feeBreakdown,
         status: "PENDING"
       });
     }

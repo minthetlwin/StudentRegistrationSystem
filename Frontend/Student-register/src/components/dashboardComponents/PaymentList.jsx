@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, IndianRupee, CheckCircle, XCircle, Eye, HandCoins } from 'lucide-react';
-import { getPayments, updatePaymentStatus } from '../../services/adminServices';
+import { Search, Loader2, IndianRupee, CheckCircle, XCircle, Eye, HandCoins, Pencil } from 'lucide-react';
+import { getPayments, updatePaymentStatus, getPaymentSettings, updatePaymentSettings } from '../../services/adminServices';
 import ViewSlipModal from '../adminComponents/ViewSlipModal';
+import FeeBreakdownModal from '../adminComponents/FeeBreakdownModal';
 
 export default function PaymentList({ user, role }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSlip, setSelectedSlip] = useState(null);
+  const [isEditingSettings, setIsEditingSettings] = useState(false);
+  const [globalSettings, setGlobalSettings] = useState(null);
   const [error, setError] = useState(null);
 
-  const fetchPayments = async () => {
+  const fetchPaymentsAndSettings = async () => {
     try {
       setLoading(true);
-      const res = await getPayments();
-      // Assume res.data is the array of payments
-      setPayments(res.data || []);
+      const [pmtRes, settingsRes] = await Promise.all([
+        getPayments(),
+        getPaymentSettings()
+      ]);
+      setPayments(pmtRes.data || []);
+      setGlobalSettings(settingsRes.data || { feeBreakdown: [] });
       setError(null);
     } catch (err) {
-      setError(err.message || "Failed to fetch payments");
+      setError(err.message || "Failed to fetch data");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPayments();
+    fetchPaymentsAndSettings();
   }, []);
 
   const handleUpdateStatus = async (id, status) => {
@@ -34,9 +40,20 @@ export default function PaymentList({ user, role }) {
       if (status === 'REJECTED' && remark === null) return;
       
       await updatePaymentStatus(id, { status, adminRemark: remark });
-      await fetchPayments();
+      await fetchPaymentsAndSettings();
     } catch (err) {
       alert(err.message || 'Failed to update status');
+    }
+  };
+
+  const handleUpdateSettings = async (feeBreakdown) => {
+    try {
+      await updatePaymentSettings(feeBreakdown);
+      await fetchPaymentsAndSettings();
+      setIsEditingSettings(false);
+    } catch (err) {
+      alert(err.message || 'Failed to update global amount settings');
+      throw err;
     }
   };
 
@@ -63,15 +80,24 @@ export default function PaymentList({ user, role }) {
           <HandCoins className="mr-2 text-indigo-600" />
           Student Payments
         </h2>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search by ID, Name or NRC..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border-slate-200 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <button
+            onClick={() => setIsEditingSettings(true)}
+            className="flex items-center justify-center px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium rounded-xl transition-colors border border-indigo-200 shadow-sm whitespace-nowrap"
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            Adjust Global Fees
+          </button>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search by ID, Name or NRC..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border-slate-200 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            />
+          </div>
         </div>
       </div>
       
@@ -104,7 +130,9 @@ export default function PaymentList({ user, role }) {
                       <div className="text-xs text-slate-500">{payment.student?.enrollment_number}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-slate-900">{payment.amountRequired?.toLocaleString()} MMK</div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-bold text-slate-900">{payment.amountRequired?.toLocaleString() || globalSettings?.totalAmountRequired?.toLocaleString() || 0} MMK</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
@@ -116,12 +144,16 @@ export default function PaymentList({ user, role }) {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                       <button
+                      {payment.status !== 'UNPAID' && payment.slip_image_url ? (
+                        <button
                           onClick={() => setSelectedSlip(payment.slip_image_url)}
                           className="text-indigo-600 hover:text-indigo-800 flex items-center font-medium"
                         >
                           <Eye className="w-4 h-4 mr-1" /> View Slip
                         </button>
+                      ) : (
+                        <span className="text-slate-400 text-xs italic">No slip yet</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       {payment.status === 'PENDING' && (
@@ -158,6 +190,13 @@ export default function PaymentList({ user, role }) {
           onClose={() => setSelectedSlip(null)} 
         />
       )}
+
+      <FeeBreakdownModal
+        isOpen={isEditingSettings}
+        onClose={() => setIsEditingSettings(false)}
+        initialBreakdown={globalSettings?.feeBreakdown}
+        onSave={handleUpdateSettings}
+      />
     </div>
   );
 }

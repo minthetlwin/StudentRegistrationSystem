@@ -148,3 +148,21 @@ export const updatePaymentStatus = async (id, statusData) => {
     throw new Error(errorMessage);
   }
 }
+
+export const getPaymentSettings = async () => {
+  try {
+    return await api.get('/api/admin/payments/settings');
+  } catch (error) {
+    const errorMessage = error.data?.message || error.message || "Failed to fetch payment settings";
+    throw new Error(errorMessage);
+  }
+}
+
+export const updatePaymentSettings = async (feeBreakdown) => {
+  try {
+    return await api.put('/api/admin/payments/settings', { feeBreakdown });
+  } catch (error) {
+    const errorMessage = error.data?.message || error.message || "Failed to update payment settings";
+    throw new Error(errorMessage);
+  }
+}

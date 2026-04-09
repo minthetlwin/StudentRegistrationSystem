@@ -13,20 +13,23 @@ const PaymentSchema = new mongoose.Schema({
   amountRequired: {
     type: Number,
     required: true,
-    default: 500000, // Default 500k MMK
+    default: 0, 
   },
+  feeBreakdown: [{
+    description: String,
+    amount: Number
+  }],
   amountPaid: {
     type: Number,
     default: 0,
   },
   slip_image_url: {
     type: String,
-    required: true,
   },
   status: {
     type: String,
-    enum: ["PENDING", "APPROVED", "REJECTED"],
-    default: "PENDING",
+    enum: ["UNPAID", "PENDING", "APPROVED", "REJECTED"],
+    default: "UNPAID",
   },
   adminRemark: {
     type: String,
