@@ -5,7 +5,9 @@ import {
   registerDorm, 
   getMyDormRegistration,
   submitStudentRegistration,
-  getMyRegistrationStatus
+  getMyRegistrationStatus,
+  getPaymentStatus,
+  submitPayment
 } from "../controllers/studentController.js";
 
 
@@ -16,6 +18,7 @@ router.post("/dorm/register", protectStudent, registerDorm);
 router.get("/dorm/my-registration", protectStudent, getMyDormRegistration);
 router.post("/register", protectStudent, submitStudentRegistration);
 router.get("/registration-status", protectStudent, getMyRegistrationStatus);
-
+router.get("/payment-status", protectStudent, getPaymentStatus);
+router.post("/payment", protectStudent, submitPayment);
 
 export default router;

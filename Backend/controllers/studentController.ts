@@ -1,6 +1,7 @@
 import DormRegistration from "../models/dormRegistration.js";
 import Semester from "../models/semesterUni.js";
 import StudentRegistration from "../models/studentRegistration.js";
+import Payment from "../models/payment.js";
 import { saveBase64Image } from "../utils/fileUpload.js";
 import mongoose from "mongoose";
 
@@ -153,6 +154,92 @@ export async function getMyRegistrationStatus(req: any, res: any) {
       data: registration
     });
 
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+import PaymentSettings from "../models/paymentSettings.js";
+
+export async function getPaymentStatus(req: any, res: any) {
+  try {
+    const studentId = req.student._id;
+    const payment = await Payment.findOne({ student: studentId }).populate("student", "full_name enrollment_number");
+    
+    // Always fetch global settings for the breakdown display
+    let settings = await PaymentSettings.findOne();
+    if (!settings) {
+      settings = { feeBreakdown: [], totalAmountRequired: 0 } as any;
+    }
+
+    if (!payment) {
+      return res.json({ 
+        exists: false, 
+        amountRequired: settings.totalAmountRequired, 
+        feeBreakdown: settings.feeBreakdown 
+      });
+    }
+    
+    // If payment exists but it's UNPAID/PENDING without its own snapshot, or we just want to ensure it has the global data for rendering
+    res.json({ 
+      exists: true, 
+      data: {
+        ...payment.toObject(),
+        feeBreakdown: payment.feeBreakdown?.length ? payment.feeBreakdown : settings.feeBreakdown,
+        amountRequired: payment.amountRequired || settings.totalAmountRequired
+      } 
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function submitPayment(req: any, res: any) {
+  try {
+    const studentId = req.student._id;
+    const { slip_image } = req.body;
+
+    if (!slip_image) {
+      return res.status(400).json({ success: false, message: "Slip image is required" });
+    }
+
+    const existingPayment = await Payment.findOne({ student: studentId });
+    if (existingPayment && existingPayment.status !== "REJECTED" && existingPayment.status !== "UNPAID") {
+      return res.status(400).json({ success: false, message: "Payment already submitted or processing" });
+    }
+
+    const slip_image_url = saveBase64Image(slip_image, 'slip');
+    if (!slip_image_url) {
+      return res.status(400).json({ success: false, message: "Invalid image format" });
+    }
+
+    let settings = await PaymentSettings.findOne();
+    if (!settings) settings = { feeBreakdown: [], totalAmountRequired: 0 } as any;
+
+    let payment;
+    if (existingPayment && (existingPayment.status === "REJECTED" || existingPayment.status === "UNPAID")) {
+      payment = await Payment.findOneAndUpdate(
+        { student: studentId },
+        { 
+          slip_image_url, 
+          status: "PENDING", 
+          adminRemark: "",
+          amountRequired: settings.totalAmountRequired,
+          feeBreakdown: settings.feeBreakdown
+        },
+        { new: true }
+      );
+    } else {
+      payment = await Payment.create({
+        student: studentId,
+        slip_image_url,
+        amountRequired: settings.totalAmountRequired,
+        feeBreakdown: settings.feeBreakdown,
+        status: "PENDING"
+      });
+    }
+
+    res.status(201).json({ success: true, message: "Payment submitted", data: payment });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

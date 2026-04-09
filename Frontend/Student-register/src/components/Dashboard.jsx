@@ -11,7 +11,9 @@ import {
   FileText,
   GraduationCap,
   Building2,
-  Bell
+  Bell,
+  CreditCard,
+  Lock
 } from 'lucide-react';
 import Setting from './dashboardComponents/Setting';
 import DormRegistrationContainer from '../containers/DormRegistrationContainer';
@@ -19,12 +21,16 @@ import DormRegisterList from './dashboardComponents/dormRegisterList';
 import StudentList from './dashboardComponents/StudentList';
 import InfoRegister from './dashboardComponents/studentListComponents/InfoRegister';
 import StudentRegistrationList from './dashboardComponents/StudentRegistrationList';
+import Notifications from './Notifications';
+import PaymentContainer from '../containers/PaymentContainer';
+import PaymentList from './dashboardComponents/PaymentList';
 
 export default function Dashboard({
   user,
   role,
   onLogout,
-  loading = false
+  loading = false,
+  registrationStatus = 'PENDING'
 }) {
   const [activeSection, setActiveSection] = useState('dorms');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -43,12 +49,14 @@ export default function Dashboard({
   const studentItems = [
     { id: 'info-register', label: 'Info-register', icon: User },
     { id: 'dorms', label: 'Dormitory', icon: Building2 },
+    { id: 'payment', label: 'Payment', icon: CreditCard },
     { id: 'exam results', label: 'Exam Results', icon: GraduationCap },
     { id: 'setting', label: 'Settings', icon: Settings },
   ];
 
   const adminItems = [
     { id: 'dorms', label: 'Dorm Requests', icon: Building2 },
+    { id: 'payment', label: 'Payments', icon: CreditCard },
     { id: 'registrars', label: 'Member Registration', icon: FileText },
     { id: 'students', label: 'Students', icon: User },
     { id: 'setting', label: 'Settings', icon: Settings },
@@ -79,7 +87,7 @@ export default function Dashboard({
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-slate-900 leading-tight">
-                    {role === 'student' ? 'Student' : 'Admin'}
+                    {user?.full_name || user?.name || user?.username || 'User'}
                   </h2>
                   <p className="text-[10px] font-bold text-slate-400 border border-slate-200 rounded px-1.5 py-0.5 inline-block uppercase tracking-wider mt-0.5">
                     {role}
@@ -148,15 +156,18 @@ export default function Dashboard({
             <h1 className="text-xl font-bold text-slate-900 capitalize">{activeSection.replace('-', ' ')}</h1>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <button className="p-2 rounded-full text-slate-400 hover:bg-slate-50 relative group">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-600 rounded-full border-2 border-white"></span>
-            </button>
-            <div className="h-8 w-[1px] bg-slate-200"></div>
+          <div className="flex items-center space-x-1 sm:space-x-4">
+            {role === 'student' && <Notifications />}
+            {(role === 'admin' || role === 'superadmin') && (
+              <button className="p-2 rounded-full text-slate-400 hover:bg-slate-50 relative group">
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-indigo-600 rounded-full border-2 border-white"></span>
+              </button>
+            )}
+            <div className="h-6 w-[1px] bg-slate-100 hidden sm:block"></div>
             <div className="flex items-center space-x-3 pl-2">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-slate-900 leading-none">{user?.name || 'User'}</p>
+                <p className="text-sm font-bold text-slate-900 leading-none">{user?.full_name || user?.name || user?.username || 'User'}</p>
                 <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wider">{role}</p>
               </div>
               <div className="w-9 h-9 bg-slate-100 rounded-full border border-slate-200 flex items-center justify-center overflow-hidden">
@@ -182,11 +193,39 @@ export default function Dashboard({
               )}
 
               {role === "student" && activeSection === 'dorms' && (
-                <DormRegistrationContainer user={user} role={role} />
+                registrationStatus === 'APPROVED' ? (
+                  <DormRegistrationContainer user={user} role={role} />
+                ) : (
+                  <div className="glass-card p-12 rounded-3xl text-center space-y-4">
+                    <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto">
+                      <Lock className="w-10 h-10 text-rose-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900">Access Locked</h3>
+                    <p className="text-slate-500 max-w-sm mx-auto">You must wait for an admin to approve your Info-register application before accessing Dormitory features.</p>
+                  </div>
+                )
+              )}
+
+              {role === "student" && activeSection === 'payment' && (
+                registrationStatus === 'APPROVED' ? (
+                  <PaymentContainer user={user} role={role} />
+                ) : (
+                  <div className="glass-card p-12 rounded-3xl text-center space-y-4">
+                    <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto">
+                      <Lock className="w-10 h-10 text-rose-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900">Access Locked</h3>
+                    <p className="text-slate-500 max-w-sm mx-auto">You must wait for an admin to approve your Info-register application before you can make payments.</p>
+                  </div>
+                )
               )}
               
               {(role === "admin" || role === "superadmin") && activeSection === 'dorms' && (
                 <DormRegisterList user={user} role={role} />
+              )}
+
+              {(role === "admin" || role === "superadmin") && activeSection === 'payment' && (
+                <PaymentList user={user} role={role} />
               )}
               
               {(role === "admin" || role === "superadmin") && activeSection === 'students' && (

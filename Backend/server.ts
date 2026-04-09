@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import logger from './utils/logger.js';
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/student", studentRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Health check for admin routes
 app.get('/admin-api-test', (req, res) => {

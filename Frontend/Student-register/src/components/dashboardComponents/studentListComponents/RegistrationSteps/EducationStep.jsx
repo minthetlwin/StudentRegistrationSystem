@@ -34,10 +34,7 @@ const EducationStep = () => {
           <option value="ပဉ္စမနှစ်">Fifth Year (ပဉ္စမနှစ်)</option>
         </select>
       </div>
-      <div>
-        <label className={labelStyle}>ပညာသင်နှစ်</label>
-        <input {...register("academic_year", { required: true })} className={inputStyle} placeholder="ဥပမာ - ၂၀၂၄-၂၀၂၅" />
-      </div>
+     
       <div>
         <label className={labelStyle}>အထူးပြုဘာသာ</label>
         <select {...register("major")} className={inputStyle}>

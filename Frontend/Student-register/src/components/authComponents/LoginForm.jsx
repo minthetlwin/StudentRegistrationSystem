@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Lock, User, Hash } from 'lucide-react';
 
+import { Calendar } from "lucide-react";
 export default function LoginForm({ onLogin, loading = false }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
@@ -28,28 +29,6 @@ export default function LoginForm({ onLogin, loading = false }) {
       </div>
 
       <form onSubmit={handleSubmit(onValid)} className="space-y-6">
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
-            Enrollment Number
-          </label>
-          <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-              <Hash className="w-4 h-4" />
-            </div>
-            <input
-              {...register("enrollment_number", { 
-                required: "Enrollment number is required" 
-              })}
-              type="text"
-              className="input-field pl-11"
-              placeholder="e.g. 2024-001"
-              disabled={loading}
-            />
-          </div>
-          {errors.enrollment_number && (
-            <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.enrollment_number.message}</p>
-          )}
-        </div>
 
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
@@ -72,6 +51,23 @@ export default function LoginForm({ onLogin, loading = false }) {
           {errors.nrc && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.nrc.message}</p>}
         </div>
 
+         <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">မွေးသက္ကရာဇ်</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Calendar className="w-4 h-4" />
+                </div>
+                <input
+                  {...register("date_of_birth", { required: "လိုအပ်သည်" })}
+                  type="date"
+                  className="input-field pl-11"
+                  disabled={loading}
+                />
+              </div>
+              {errors.dateOfBirth && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.dateOfBirth.message}</p>}
+            </div>
+
+        
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
             Password

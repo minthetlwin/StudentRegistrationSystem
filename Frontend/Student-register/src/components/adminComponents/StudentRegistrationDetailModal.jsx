@@ -170,7 +170,9 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
               <InfoCard label="Full Name (English)" value={registration.name_en} icon={User} />
               <InfoCard label="NRC Number" value={registration.nrc} icon={ShieldCheck} />
               <InfoCard label="Date of Birth" value={new Date(registration.dob).toLocaleDateString()} icon={Calendar} />
+              <InfoCard label="Birth place" value={registration.birth_place} icon={MapPin} />
               <InfoCard label="Religion" value={registration.religion} icon={MapPin} />
+              <InfoCard label="Nationality" value={registration.nationality} icon={MapPin} />
                
               <InfoCard label="Contact Phone" value={registration.phone} icon={Smartphone} />
               <InfoCard label="Permanent Address" value={registration.address} icon={Home} className="md:col-span-2" />
@@ -182,9 +184,9 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
             <SectionTitle icon={GraduationCap} title="Education History" subtitle="Verified Academic Records" />
             <div className="space-y-8">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <InfoCard label="G12 Exam Year" value={registration.g12_exam_year} icon={GraduationCap} />
-                <InfoCard label="G12 Seat Number" value={registration.g12_seat_no} icon={FileText} />
-                <InfoCard label="Exam Center" value={registration.g12_exam_center} icon={Home} />
+                <InfoCard label="ခုမှတ်" value={registration.matric_roll_no} icon={GraduationCap} />
+                <InfoCard label="ခုနှစ်" value={registration.matric_year} icon={FileText} />
+                <InfoCard label="စာစစ်ဥှညန" value={registration.matric_dept} icon={Home} />
               </div>
               
               <div className="bg-white rounded-[2rem] border border-slate-200 p-8 shadow-sm">
@@ -196,14 +198,20 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
                     <thead className="bg-slate-50/80 border-b border-slate-100">
                       <tr>
                         <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Academic Year</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Major</th>
                         <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Roll Number / ID</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">year</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Pass / Fail</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {registration.previous_exams?.map((exam, i) => (
                         <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-black text-slate-900">{exam.exam_year}</td>
+                          <td className="px-6 py-4 text-sm font-black text-slate-900">{exam.exam_name}</td>
+                          <td className="px-6 py-4 text-sm font-black text-slate-900">{exam.major}</td>
                           <td className="px-6 py-4 text-sm font-black text-indigo-600 font-mono italic tracking-tighter">{exam.roll_no}</td>
+                          <td className="px-6 py-4 text-sm font-black text-indigo-600 font-mono italic tracking-tighter">{exam.year}</td>
+                          <td className="px-6 py-4 text-sm font-black text-indigo-600 font-mono italic tracking-tighter">{exam.result}</td>
                         </tr>
                       ))}
                       {(!registration.previous_exams || registration.previous_exams.length === 0) && (
@@ -238,6 +246,26 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
                     <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
                     <span className="text-sm font-black text-indigo-600">{registration.father_nrc}</span>
                   </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.father_race}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.father_religion}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.father_birth_place}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.father_state_division}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.father_nationality}</span>
+                  </div>
                 </div>
               </div>
               {/* Mother */}
@@ -257,6 +285,26 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
                   <div className="flex justify-between py-2">
                     <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
                     <span className="text-sm font-black text-indigo-600">{registration.mother_nrc}</span>
+                  </div>
+                     <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.mother_race}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.mother_religion}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.mother_birth_place}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.mother_state_division}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-sm font-black text-indigo-600">{registration.mother_nationality}</span>
                   </div>
                 </div>
               </div>

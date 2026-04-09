@@ -5,22 +5,22 @@ import jwt from "jsonwebtoken";
 
 export const verifyAdmittedStudent = async (req, res) => {
   try {
-    const { nrc, g12_exam_id, enrollment_number, date_of_birth } = req.body;
+    const { nrc, g12_exam_id, date_of_birth } = req.body;
 
-    if (!enrollment_number || !nrc || !date_of_birth) {
+    if (!nrc || !date_of_birth || !g12_exam_id) {
       return res.status(400).json({
         success: false,
-        message: "Enrollment number, NRC and Date of Birth are required"
+        message: "NRC, G12 Exam ID and Date of Birth are required"
       });
     }
 
     // Search in AdmittedStudents first
-    let student = await AdmittedStudents.findOne({ nrc, enrollment_number });
+    let student = await AdmittedStudents.findOne({ nrc, g12_exam_id });
     let isTransferStudent = false;
 
     // If not found, check CurrentStudents (for transfer students without password)
     if (!student) {
-      student = await Students.findOne({ nrc, enrollment_number });
+      student = await Students.findOne({ nrc, g12_exam_id });
       
       if (student) {
         if (student.password) {
@@ -65,7 +65,6 @@ export const verifyAdmittedStudent = async (req, res) => {
       message: "Student verified successfully",
       student: {
         nrc: student.nrc,
-        enrollment_number: student.enrollment_number,
         date_of_birth: student.date_of_birth,
         full_name: student.full_name,
         g12_exam_id: student.g12_exam_id,
@@ -85,9 +84,9 @@ export const verifyAdmittedStudent = async (req, res) => {
 
 export const setStudentPassword = async (req, res) => {
   try {
-    const { enrollment_number, nrc, date_of_birth, new_password, confirm_password } = req.body;
+    const { nrc, date_of_birth, new_password, confirm_password } = req.body;
 
-    if (!enrollment_number || !nrc || !date_of_birth || !new_password || !confirm_password) {
+    if (!nrc || !date_of_birth || !new_password || !confirm_password) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
@@ -96,7 +95,7 @@ export const setStudentPassword = async (req, res) => {
     }
 
     // Check if student exists in CurrentStudents (transfer student)
-    const currentStudent = await Students.findOne({ enrollment_number, nrc });
+    const currentStudent = await Students.findOne({ nrc });
     
     if (currentStudent) {
       if (currentStudent.password) {
@@ -111,7 +110,7 @@ export const setStudentPassword = async (req, res) => {
     }
 
     // Check AdmittedStudents (new student)
-    const admittedStudent = await AdmittedStudents.findOne({ enrollment_number, nrc });
+    const admittedStudent = await AdmittedStudents.findOne({ nrc });
 
     if (!admittedStudent) {
       return res.status(404).json({ success: false, message: "Student not found" });
@@ -151,16 +150,16 @@ export const setStudentPassword = async (req, res) => {
 
 export const loginStudent = async (req, res) => {
   try {
-    const { enrollment_number, nrc, password } = req.body;
+    const { nrc, password , date_of_birth } = req.body;
 
-    if (!enrollment_number || !nrc || !password) {
-      return res.status(400).json({ success: false, message: "Enrollment number, NRC, and password are required" });
+    if (!nrc || !password) {
+      return res.status(400).json({ success: false, message: "NRC and password are required" });
     }
 
-    // Find student by BOTH enrollment + NRC
+    // Find student by NRC
     const student = await Students.findOne({ 
-      enrollment_number,
       nrc,
+      date_of_birth
     });
 
     if (!student) {
@@ -178,7 +177,6 @@ export const loginStudent = async (req, res) => {
     const token = jwt.sign(
       { 
         studentId: student._id, 
-        enrollment_number: student.enrollment_number,
         role: student.role || 'student'
       },
       process.env.JWT_SECRET || 'fallback_secret',

@@ -99,9 +99,12 @@ const PersonalStep = () => {
             <label className={labelStyle}>မှတ်ပုံတင်အမှတ်</label>
             <input {...register("father_nrc")} className={inputStyle} />
           </div>
-          <div>
-            <label className={labelStyle}>နိုင်ငံသား/နိုင်ငံခြားသား</label>
-            <input {...register("father_nationality")} className={inputStyle} />
+           <div>
+            <label className={labelStyle}>နိုင်ငံခြားသား</label>
+            <select {...register("father_nationality")} className={inputStyle} >
+              <option value="တိုင်းရင်းသား">တိုင်းရင်းသား</option>
+              <option value="နိုင်ငံခြားသား">နိုင်ငံခြားသား</option>
+            </select>
           </div>
         </div>
 
@@ -136,9 +139,12 @@ const PersonalStep = () => {
             <label className={labelStyle}>မှတ်ပုံတင်အမှတ်</label>
             <input {...register("mother_nrc")} className={inputStyle} />
           </div>
-          <div>
-            <label className={labelStyle}>နိုင်ငံသား/နိုင်ငံခြားသား</label>
-            <input {...register("mother_nationality")} className={inputStyle} />
+           <div>
+            <label className={labelStyle}>နိုင်ငံခြားသား</label>
+            <select {...register("mother_nationality")} className={inputStyle} >
+              <option value="တိုင်းရင်းသား">တိုင်းရင်းသား</option>
+              <option value="နိုင်ငံခြားသား">နိုင်ငံခြားသား</option>
+            </select>
           </div>
         </div>
 

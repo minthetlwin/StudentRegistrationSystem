@@ -14,7 +14,11 @@ import {
   addAdmittedStudent,
   addCurrentStudent,
   getStudentRegistrations,
-  updateStudentRegistrationStatus
+  updateStudentRegistrationStatus,
+  getAllPayments,
+  updatePaymentStatus,
+  getPaymentSettings,
+  updatePaymentSettings
 } from "../controllers/adminController.js";
 import { protectAdmin } from "../middleware/authMiddleware.js";
 
@@ -42,5 +46,11 @@ router.delete("/admitted-students/:id", protectAdmin, deleteAdmittedStudent);
 router.delete("/current-students/:id", protectAdmin, deleteCurrentStudent);
 router.post("/admitted-students", protectAdmin, addAdmittedStudent);
 router.post("/current-students", protectAdmin, addCurrentStudent);
+
+// Payment management
+router.get("/payments", protectAdmin, getAllPayments);
+router.put("/payments/:id/status", protectAdmin, updatePaymentStatus);
+router.get("/payments/settings", protectAdmin, getPaymentSettings);
+router.put("/payments/settings", protectAdmin, updatePaymentSettings);
 
 export default router;
