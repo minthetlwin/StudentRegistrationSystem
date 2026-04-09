@@ -27,12 +27,19 @@ const PledgeStep = ({ pledgeAgreed, setPledgeAgreed }) => {
       <div className="space-y-2">
         <h3 className="text-lg font-bold text-slate-800 flex items-center space-x-2">
           <User className="w-5 h-5 text-indigo-600" />
-          <span>နေကောင်းရေနှင့် ထောက်ခံမည့်ပုဂ္ဂိုလ် (အုပ်ထိန်းသူ)</span>
+          <span>ကျောင်းနေရေးနှင့် ထောက်ခံမည့်ပုဂ္ဂိုလ် (အုပ်ထိန်းသူ)</span>
         </h3>
         <div className="h-1 w-20 bg-indigo-600 rounded-full"></div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <div className="col-span-2">
+          <label className={labelStyle}>ပညာသင်ချောင်ပ့ကြေး ပေးနှင် ကူညီမည့်ပုဂ္ဂိုလ် (ရှိပါက)</label>
+            <select {...register("sponser_name")} className={inputStyle} >
+                        <option value="ရှိ">ရှိ</option>
+                        <option value="မရှိ">မရှိ</option>
+            </select>
+        </div>
         <div>
           <label className={labelStyle}>(က) အမည်</label>
           <input {...register("guarantor_name")} className={inputStyle} placeholder="အုပ်ထိန်းသူ အမည်" />
@@ -53,10 +60,7 @@ const PledgeStep = ({ pledgeAgreed, setPledgeAgreed }) => {
           <label className={labelStyle}>မှတ်ပုံတင်အမှတ်</label>
           <input {...register("guarantor_nrc")} className={inputStyle} placeholder="၉/မရတ(နိုင်)xxxxxx" />
         </div>
-        <div className="col-span-2">
-          <label className={labelStyle}>ပညာသင်ချောင်ပ့ကြေး ပေးနှင် ကူညီမည့်ပုဂ္ဂိုလ် (ရှိပါက)</label>
-          <input {...register("sponsor_name")} className={inputStyle} placeholder="ပုဂ္ဂိုလ်၏ အမည်" />
-        </div>
+       
       </div>
 
       {/* Pledge Section */}

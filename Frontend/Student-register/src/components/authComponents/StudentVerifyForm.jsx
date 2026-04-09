@@ -29,22 +29,6 @@ export default function StudentVerifyForm({ onVerify }) {
         
         <form onSubmit={handleSubmit(onValid)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Enrollment Number */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">ကျောင်းဝင်ခွင့်နံပတ်</label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Hash className="w-4 h-4" />
-                </div>
-                <input
-                  {...register("admissionNumber", { required: "လိုအပ်သည်" })}
-                  type="text"
-                  className="input-field pl-11"
-                  placeholder="Admission ID"
-                />
-              </div>
-              {errors.admissionNumber && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.admissionNumber.message}</p>}
-            </div>
 
             {/* NRC Number */}
             <div className="space-y-1.5">
@@ -87,7 +71,7 @@ export default function StudentVerifyForm({ onVerify }) {
                   <ClipboardCheck className="w-4 h-4" />
                 </div>
                 <input
-                  {...register("g12ExamId")}
+                  {...register("g12ExamId", { required: "လိုအပ်သည်" })}
                   type="text"
                   className="input-field pl-11"
                   placeholder="Exam ID (Optional)"

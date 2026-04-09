@@ -28,8 +28,8 @@ const AddressStep = () => {
         <textarea {...register("address")} className={`${inputStyle} h-32 resize-none`} placeholder="အိမ်အမှတ်၊ လမ်း၊ ရပ်ကွက်၊ မြို့နယ်..." />
       </div>
       <div>
-        <label className={labelStyle}>ဖုန်းနံပါတ်</label>
-        <input {...register("phone")} className={inputStyle} placeholder="၀၉-xxxxxxxxx" />
+        <label className={labelStyle}>ဖုန်းနံပါတ် </label>
+        <input {...register("phone")} className={inputStyle} placeholder="ဖုန်းနံပာတ်တစ်လုွးထက်ပိုထည့်ပးရန်" />
       </div>
       <div>
         <label className={labelStyle}>မွေးဖွားရာဒေသ</label>

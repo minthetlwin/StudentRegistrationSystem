@@ -6,6 +6,8 @@ import DormRegistration from "../models/dormRegistration.js";
 import AdmittedStudents from "../models/admittedStudents.js";
 import MainStudents from "../models/mainStudents.js";
 import StudentRegistration from "../models/studentRegistration.js";
+import Notification from "../models/notification.js";
+import Payment from "../models/payment.js";
 
 
 export const adminLogin = async (req, res) => {
@@ -200,6 +202,20 @@ export const updateDormStatus = async (req, res) => {
       });
     }
 
+    // Create Notification for Student
+    const recipientId = updated.student?._id || updated.student;
+    if (recipientId) {
+      const studentDoc = updated.student as any;
+      const semesterDoc = updated.semester as any;
+      await Notification.create({
+        recipient: recipientId,
+        title: `Dormitory Registration ${status}`,
+        message: `Your dormitory registration for ${semesterDoc?.name || ''} (${semesterDoc?.academicYear || ''}) has been ${status.toLowerCase()}. ${adminRemark ? `Remark: ${adminRemark}` : ''}`,
+        type: status === 'APPROVED' ? 'SUCCESS' : status === 'REJECTED' ? 'ERROR' : 'INFO',
+        link: '/dashboard',
+      });
+    }
+
     res.json({
       success: true,
       message: 'Status updated successfully',
@@ -266,6 +282,18 @@ export const updateAdmittedStudentStatus = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Student not found'
+      });
+    }
+
+    // Create Notification if student already has a MainStudents record (transfer students)
+    const existingMainStudent = await MainStudents.findOne({ nrc: student.nrc, enrollment_number: student.enrollment_number });
+    if (existingMainStudent) {
+      await Notification.create({
+        recipient: existingMainStudent._id,
+        title: `Admission Status Updated`,
+        message: `Your admission status has been updated to ${status}.`,
+        type: status === 'REGISTERED' ? 'SUCCESS' : 'INFO',
+        link: '/dashboard',
       });
     }
 
@@ -533,9 +561,84 @@ export const updateStudentRegistrationStatus = async (req: any, res: any) => {
       });
     }
 
+    // Create Notification for Student
+    const recipientId = updated.student?._id || updated.student;
+    if (recipientId) {
+      await Notification.create({
+        recipient: recipientId,
+        title: `Student Registration ${status}`,
+        message: `Your student registration has been ${status.toLowerCase()}. ${adminRemark ? `Remark: ${adminRemark}` : ''}`,
+        type: status === 'APPROVED' ? 'SUCCESS' : status === 'REJECTED' ? 'ERROR' : 'INFO',
+        link: '/dashboard',
+      });
+    }
+
     res.json({
       success: true,
       message: 'Status updated successfully',
+      data: updated
+    });
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false,
+      message: error.message 
+    });
+  }
+};
+
+export const getAllPayments = async (req: any, res: any) => {
+  try {
+    const payments = await Payment.find()
+      .populate('student', 'full_name enrollment_number g12_exam_id nrc date_of_birth')
+      .populate('reviewedBy', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: payments
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updatePaymentStatus = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { status, adminRemark } = req.body;
+
+    const updated = await Payment.findByIdAndUpdate(
+      id,
+      { 
+        status, 
+        adminRemark,
+        reviewedBy: req.user._id,
+        reviewedAt: new Date()
+      },
+      { new: true }
+    ).populate('student', 'full_name enrollment_number');
+
+    if (!updated) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Payment not found' 
+      });
+    }
+
+    const recipientId = updated.student?._id || updated.student;
+    if (recipientId) {
+      await Notification.create({
+        recipient: recipientId,
+        title: `Payment ${status}`,
+        message: `Your payment has been ${status.toLowerCase()}. ${adminRemark ? `Remark: ${adminRemark}` : ''}`,
+        type: status === 'APPROVED' ? 'SUCCESS' : status === 'REJECTED' ? 'ERROR' : 'INFO',
+        link: '/dashboard',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Payment status updated successfully',
       data: updated
     });
   } catch (error: any) {

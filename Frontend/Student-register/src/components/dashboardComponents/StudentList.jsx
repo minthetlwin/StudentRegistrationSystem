@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserPlus, Search, Filter, MoreHorizontal, Plus, Users, UserCheck, Loader2, AlertCircle } from 'lucide-react';
+import { UserPlus, Search, Filter, MoreHorizontal, Plus, Users, UserCheck, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import CurrentStudentsList from './studentListComponents/CurrentStudentsLists';
 import NewAdmittedStudentsLists from './studentListComponents/NewAdmittedStudentsLists';
 import ViewDetail from '../adminComponents/viewDetail';

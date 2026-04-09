@@ -1,6 +1,7 @@
 import DormRegistration from "../models/dormRegistration.js";
 import Semester from "../models/semesterUni.js";
 import StudentRegistration from "../models/studentRegistration.js";
+import Payment from "../models/payment.js";
 import { saveBase64Image } from "../utils/fileUpload.js";
 import mongoose from "mongoose";
 
@@ -153,6 +154,60 @@ export async function getMyRegistrationStatus(req: any, res: any) {
       data: registration
     });
 
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function getPaymentStatus(req: any, res: any) {
+  try {
+    const studentId = req.student._id;
+    const payment = await Payment.findOne({ student: studentId });
+    if (!payment) {
+      return res.json({ exists: false, amountRequired: 500000 });
+    }
+    res.json({ exists: true, data: payment });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function submitPayment(req: any, res: any) {
+  try {
+    const studentId = req.student._id;
+    const { slip_image } = req.body;
+
+    if (!slip_image) {
+      return res.status(400).json({ success: false, message: "Slip image is required" });
+    }
+
+    const existingPayment = await Payment.findOne({ student: studentId });
+    if (existingPayment && existingPayment.status !== "REJECTED") {
+      return res.status(400).json({ success: false, message: "Payment already submitted or processing" });
+    }
+
+    const slip_image_url = saveBase64Image(slip_image, 'slip');
+    if (!slip_image_url) {
+      return res.status(400).json({ success: false, message: "Invalid image format" });
+    }
+
+    let payment;
+    if (existingPayment && existingPayment.status === "REJECTED") {
+      payment = await Payment.findOneAndUpdate(
+        { student: studentId },
+        { slip_image_url, status: "PENDING", adminRemark: "" },
+        { new: true }
+      );
+    } else {
+      payment = await Payment.create({
+        student: studentId,
+        slip_image_url,
+        amountRequired: 500000,
+        status: "PENDING"
+      });
+    }
+
+    res.status(201).json({ success: true, message: "Payment submitted", data: payment });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

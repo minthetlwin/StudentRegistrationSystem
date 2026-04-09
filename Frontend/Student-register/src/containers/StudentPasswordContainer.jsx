@@ -20,7 +20,6 @@ export default function StudentPasswordContainer() {
         // Store student data or fallback to form data
         const studentData = result.student || {
           nrc: data.nrcNumber,
-          enrollment_number: data.admissionNumber,
           date_of_birth: data.dateOfBirth,
           g12_exam_id: data.g12ExamId
         };
@@ -50,7 +49,6 @@ export default function StudentPasswordContainer() {
       const payload = { 
         ...data, 
         nrc: student.nrc, 
-        enrollment_number: student.enrollment_number, 
         date_of_birth: student.date_of_birth 
       };
       // console.log('Setting password with payload:', payload);

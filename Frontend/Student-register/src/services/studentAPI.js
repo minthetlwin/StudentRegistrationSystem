@@ -1,56 +1,69 @@
-import axios from "axios";
-
-const API_BASE_URL = '';
-
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
-  return { Authorization: `Bearer ${token}` };
-};
+import { api } from "../utils/api";
 
 export const fetchDashboardData = async () => {
-  const res = await axios.get(`/api/auth/dashboard`, {
-    headers: getAuthHeaders(),
-  });
-  return res.data.student;
+  try {
+    const res = await api.get(`/api/auth/dashboard`);
+    return res.student;
+  } catch (error) {
+    console.error("Fetch dashboard error:", error);
+    throw error;
+  }
 };
 
 export const fetchNotifications = async () => {
-  const res = await axios.get(`/api/auth/notifications`, {
-    headers: getAuthHeaders(),
-  });
-  return res.data.notifications;
+  try {
+    const res = await api.get(`/api/auth/notifications`);
+    return res.notifications;
+  } catch (error) {
+    console.error("Fetch notifications error:", error);
+    throw error;
+  }
 };
 
 export const registerForDorm = async (data) => {
   try {
-    const response = await axios.post('/api/student/dorm/register', data, {
-      headers: getAuthHeaders(),
-    });
-    return response.data;
+    return await api.post('/api/student/dorm/register', data);
   } catch (error) {
-    throw error.response?.data || { message: "Dorm registration failed" };
+    throw error.data || { message: "Dorm registration failed" };
   }
 };
 
-
-export const studentList = async (data) =>{
-  try{
-    const response = await axios.get('/api/student/list',data,{
-      headers: getAuthHeaders(),
-    });
-    return response.data;
+export const studentList = async () => {
+  try {
+    return await api.get('/api/student/list');
   } catch (error) {
-    throw error.response?.data || { message: "Fetching student list failed" };
+    throw error.data || { message: "Fetching student list failed" };
   }     
 };
+
 export const registerStudent = async (registrationData) => {
   try {
-    const response = await axios.post('/api/student/register', registrationData, {
-      headers: getAuthHeaders(),
-    });
-    return response.data;
+    return await api.post('/api/student/register', registrationData);
   } catch (error) {
-    throw error.response?.data || { message: "Student registration failed" };
+    throw error.data || { message: "Student registration failed" };
+  }
+};
+
+export const getMyRegistrationStatus = async () => {
+  try {
+    return await api.get('/api/student/registration-status');
+  } catch (error) {
+    throw error.data || { message: "Fetching registration status failed" };
+  }
+};
+
+export const getPaymentStatus = async () => {
+  try {
+    return await api.get('/api/student/payment-status');
+  } catch (error) {
+    throw error.data || { message: "Fetching payment status failed" };
+  }
+};
+
+export const submitPayment = async (data) => {
+  try {
+    return await api.post('/api/student/payment', data);
+  } catch (error) {
+    throw error.data || { message: "Payment submission failed" };
   }
 };
