@@ -1,4 +1,5 @@
 import Notification from "../models/notification.js";
+import logger from "../utils/logger.js";
 
 /**
  * Get all notifications for the authenticated student.
@@ -15,7 +16,8 @@ export const getMyNotifications = async (req: any, res: any) => {
       data: notifications,
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`getMyNotifications error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -42,7 +44,8 @@ export const markAsRead = async (req: any, res: any) => {
       data: notification,
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`markAsRead error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -63,7 +66,8 @@ export const markAllAsRead = async (req: any, res: any) => {
       message: "All notifications marked as read",
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`markAllAsRead error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -86,6 +90,7 @@ export const deleteNotification = async (req: any, res: any) => {
       message: "Notification deleted",
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`deleteNotification error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserPlus, Search, Filter, MoreHorizontal, Plus, Users, UserCheck, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { SkeletonStudentList } from '../SkeletonLoaders';
 import CurrentStudentsList from './studentListComponents/CurrentStudentsLists';
 import NewAdmittedStudentsLists from './studentListComponents/NewAdmittedStudentsLists';
 import ViewDetail from '../adminComponents/viewDetail';
@@ -266,9 +267,8 @@ export default function StudentList() {
         {/* List Content */}
         <div className="p-0">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-24 space-y-4">
-              <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-              <span className="text-slate-500 font-bold text-sm animate-pulse">Syncing student database...</span>
+            <div className="p-6">
+              <SkeletonStudentList count={5} />
             </div>
           ) : (
             <motion.div

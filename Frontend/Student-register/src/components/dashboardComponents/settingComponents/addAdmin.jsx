@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { createAdmin } from "../../../services/adminServices";
+import PasswordStrengthIndicator from "../../authComponents/PasswordStrengthIndicator";
+import { ShieldAlert } from 'lucide-react';
 
 export default function AddAdmin() {
   const [formData, setFormData] = useState({
@@ -21,6 +23,19 @@ export default function AddAdmin() {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setMessage('Error: Password does not meet security requirements.');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setMessage('Error: Passwords do not match');
+      setLoading(false);
+      return;
+    }
 
     try {
       const data = await createAdmin(formData);
@@ -153,15 +168,25 @@ export default function AddAdmin() {
           </button>
         </div>
 
+        {/* Password Strength Indicator */}
+        <div className="col-span-2">
+            <PasswordStrengthIndicator password={formData.password} />
+        </div>
+
         {/* Submit */}
-        <div className="col-span-2 flex justify-end pt-2">
+        <div className="col-span-2 flex justify-end pt-4">
           <button
             disabled={loading}
             className="bg-indigo-600 hover:bg-indigo-700
-                       disabled:bg-gray-400
-                       text-white px-6 py-2 rounded-lg font-medium transition"
+                       disabled:bg-slate-300
+                       text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-100 disabled:shadow-none"
           >
-            {loading ? 'Adding...' : 'Add Admin'}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span>Adding...</span>
+              </span>
+            ) : 'Add Admin Account'}
           </button>
         </div>
       </form>

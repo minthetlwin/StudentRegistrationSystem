@@ -7,14 +7,20 @@ const studentRegistrationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Students",
       required: true,
-      unique: true, // one registration per student
+    },
+
+    // Link to concrete semester
+    semester: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Semester",
+      required: true,
     },
 
     // ── Step 1: Academic Info ─────────────────────────────────────────────────
     academic_year: { type: String, required: true },   // e.g. "2024-2025"
     year_of_study: { 
       type: String, 
-      enum: ["ပထမနှစ်", "ဒုတိယနှစ်", "တတိယနှစ်", "စတုတ္ထနှစ်", "ပဉ္စမနှစ်", "Final Year"], 
+      enum: ["ပထမနှစ်", "ဒုတိယနှစ်", "တတိယနှစ်", "စတုတ္ထနှစ်", "ပဉ္စမနှစ်"], 
       required: true 
     },
     major: { type: String, enum: ["CS", "CT","none"], required: true },
@@ -105,5 +111,8 @@ const studentRegistrationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// One registration per student per semester
+studentRegistrationSchema.index({ student: 1, semester: 1 }, { unique: true });
 
 export default mongoose.model("StudentRegistration", studentRegistrationSchema);

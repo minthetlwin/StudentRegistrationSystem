@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PaymentForm from "../components/studentComponents/PaymentForm";
 import { getPaymentStatus, submitPayment } from "../services/studentAPI";
+import { SkeletonCard } from "../components/SkeletonLoaders";
 
 export default function PaymentContainer() {
   const [loading, setLoading] = useState(true);
@@ -45,8 +46,8 @@ export default function PaymentContainer() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="w-full">
+        <SkeletonCard />
       </div>
     );
   }

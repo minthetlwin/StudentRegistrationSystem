@@ -24,6 +24,7 @@ import StudentRegistrationList from './dashboardComponents/StudentRegistrationLi
 import Notifications from './Notifications';
 import PaymentContainer from '../containers/PaymentContainer';
 import PaymentList from './dashboardComponents/PaymentList';
+import { SkeletonDashboard } from './SkeletonLoaders';
 
 export default function Dashboard({
   user,
@@ -36,14 +37,7 @@ export default function Dashboard({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
-          <p className="text-slate-500 font-medium animate-pulse">Loading workspace...</p>
-        </div>
-      </div>
-    );
+    return <SkeletonDashboard />;
   }
 
   const studentItems = [

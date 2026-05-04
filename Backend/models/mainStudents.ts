@@ -11,7 +11,11 @@ const studentSchema = new mongoose.Schema({
     program: { type: String, enum: ["CS", "CT","none"], default: "none"},
     admission_year: { type: String },
     current_year: { type: Number, default: 1 }, // 1 = Fresher
-    status: { type: String, enum: ["REGISTERED", "BLOCKED"], default: "REGISTERED" }
+    status: { 
+      type: String, 
+      enum: ["REGISTERED", "SUSPENDED", "TRANSFERRED", "LEFT", "GRADUATED", "BLOCKED"], 
+      default: "REGISTERED" 
+    }
 }, { timestamps: true });
 
 export default  mongoose.model("Students", studentSchema);

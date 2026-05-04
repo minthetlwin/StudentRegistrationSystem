@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Lock, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
 
 export default function SetPasswordForm({ onSetPassword }) {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
@@ -36,7 +37,13 @@ export default function SetPasswordForm({ onSetPassword }) {
             <input
               {...register("new_password", { 
                 required: "Password is required", 
-                minLength: { value: 6, message: "Password must be at least 6 characters" }
+                minLength: { value: 8, message: "Password must be at least 8 characters" },
+                validate: {
+                  hasUpper: v => /[A-Z]/.test(v) || "Must contain uppercase",
+                  hasLower: v => /[a-z]/.test(v) || "Must contain lowercase",
+                  hasNumber: v => /[0-9]/.test(v) || "Must contain a number",
+                  hasSpecial: v => /[!@#$%^&*(),.?":{}|<>]/.test(v) || "Must contain a special character",
+                }
               })}
               type={showPassword ? "text" : "password"}
               className="input-field pl-11 pr-12"
@@ -51,6 +58,7 @@ export default function SetPasswordForm({ onSetPassword }) {
             </button>
           </div>
           {errors.new_password && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.new_password.message}</p>}
+          <PasswordStrengthIndicator password={password || ""} />
         </div>
 
         <div className="space-y-1.5">

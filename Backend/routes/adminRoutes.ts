@@ -20,14 +20,16 @@ import {
   getPaymentSettings,
   updatePaymentSettings
 } from "../controllers/adminController.js";
-import { protectAdmin } from "../middleware/authMiddleware.js";
+import { protectAdmin, requireSuperAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Define routes with protectAdmin middleware
-router.post("/add-admin", protectAdmin, addAdmin);
+// Superadmin-only: add new admin accounts
+router.post("/add-admin", protectAdmin, requireSuperAdmin, addAdmin);
+
+// Admin routes (all protected)
 router.post("/add-semester", protectAdmin, addSemester);
-router.get("/dorm-registrations", getDormRegistrations);
+router.get("/dorm-registrations", protectAdmin, getDormRegistrations);
 router.put("/dorm-registrations/:id/status", protectAdmin, updateDormStatus);
 
 // Student registration management

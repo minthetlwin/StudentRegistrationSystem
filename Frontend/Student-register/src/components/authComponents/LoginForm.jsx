@@ -64,7 +64,7 @@ export default function LoginForm({ onLogin, loading = false }) {
                   disabled={loading}
                 />
               </div>
-              {errors.dateOfBirth && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.dateOfBirth.message}</p>}
+              {errors.date_of_birth && <p className="text-[11px] text-rose-500 ml-1 font-medium italic">{errors.date_of_birth.message}</p>}
             </div>
 
         

@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { validatePassword } from "../utils/passwordValidator.js";
 import adminUser from "../models/adminUser.js";
 import Semester from "../models/semesterUni.js";
 import DormRegistration from "../models/dormRegistration.js";
@@ -8,35 +9,59 @@ import MainStudents from "../models/mainStudents.js";
 import StudentRegistration from "../models/studentRegistration.js";
 import Notification from "../models/notification.js";
 import Payment from "../models/payment.js";
+import PaymentSettings from "../models/paymentSettings.js";
+import logger from "../utils/logger.js";
 
+// ── Helpers ─────────────────────────────────────────────────────────────────────
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Whitelist of fields an admin is allowed to bulk-update on a student record */
+const ALLOWED_ADMITTED_UPDATE_FIELDS = [
+  'full_name', 'enrollment_number', 'nrc', 'date_of_birth',
+  'g12_exam_id', 'program', 'admission_year', 'status'
+];
+
+const ALLOWED_CURRENT_UPDATE_FIELDS = [
+  'full_name', 'enrollment_number', 'nrc', 'date_of_birth',
+  'g12_exam_id', 'program', 'admission_year', 'current_year', 'status'
+];
+
+/** Pick only allowed keys from an object */
+const pickAllowedFields = (body: any, allowed: string[]) => {
+  const cleaned: any = {};
+  for (const key of allowed) {
+    if (body[key] !== undefined) cleaned[key] = body[key];
+  }
+  return cleaned;
+};
+
+
+// ── Auth ─────────────────────────────────────────────────────────────────────────
 
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
-    // Find admin or superadmin by email
-    const totalAdmins = await adminUser.countDocuments();
-   
-    
     const admin = await adminUser.findOne({ email });
-    
+
     if (!admin) {
-      return res.status(401).json({ message: 'Invalid credentials - no admin found' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // Check if admin is active
+    // Check if admin is active — same generic message to prevent enumeration
     if (!admin.isActive) {
-      return res.status(401).json({ message: 'Account is deactivated' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials password' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
     // Generate JWT token
@@ -46,7 +71,7 @@ export const adminLogin = async (req, res) => {
         email: admin.email,
         role: admin.role 
       },
-      process.env.JWT_SECRET || 'fallback_secret',
+      process.env.JWT_SECRET as string,
       { expiresIn: '7d' }
     );
 
@@ -55,24 +80,23 @@ export const adminLogin = async (req, res) => {
     await admin.save();
 
     res.status(200).json({
-    success: true,
-    message: 'Login successful',
-    token,
-    user: {
-      id: admin._id,
-      name: admin.name,
-      email: admin.email,
+      success: true,
+      message: 'Login successful',
+      token,
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+      },
       role: admin.role
-    },
-    role: admin.role
-  });
+    });
 
   } catch (err: any) {
-    res.status(500).json({ message: 'Server error' });
+    logger.error(`adminLogin error: ${err.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
-
 
 
 export const addAdmin = async (req, res) => {
@@ -87,12 +111,28 @@ export const addAdmin = async (req, res) => {
       });
     }
 
+    // Email format validation
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format'
+      });
+    }
+
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
         message: 'Passwords do not match'
       });
+    }
 
+    // Validate password complexity
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordValidation.message
+      });
     }
 
     const existingAdmin = await adminUser.findOne({ email });
@@ -126,6 +166,7 @@ export const addAdmin = async (req, res) => {
     });
 
   } catch (error: any) {
+    logger.error(`addAdmin error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -138,7 +179,7 @@ export const addSemester = async (req, res) => {
     const { name, academicYear, isActive, startDate, endDate } = req.body;
 
     if (!name || !academicYear || !startDate || !endDate) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
     const semester = await Semester.create({
@@ -155,7 +196,8 @@ export const addSemester = async (req, res) => {
       data: semester
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    logger.error(`addSemester error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -172,7 +214,8 @@ export const getDormRegistrations = async (req, res) => {
       data: registrations
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    logger.error(`getDormRegistrations error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -222,9 +265,10 @@ export const updateDormStatus = async (req, res) => {
       data: updated
     });
   } catch (error: any) {
+    logger.error(`updateDormStatus error: ${error.message}`);
     res.status(500).json({ 
       success: false,
-      message: error.message 
+      message: 'Server error'
     });
   }
 };
@@ -241,9 +285,10 @@ export const getNewAdmittedStudents = async (req, res) => {
       data: students
     });
   } catch (error: any) {
+    logger.error(`getNewAdmittedStudents error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -260,9 +305,10 @@ export const getCurrentStudents = async (req, res) => {
       data: students
     });
   } catch (error: any) {
+    logger.error(`getCurrentStudents error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -303,9 +349,10 @@ export const updateAdmittedStudentStatus = async (req, res) => {
       data: student
     });
   } catch (error: any) {
+    logger.error(`updateAdmittedStudentStatus error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -313,10 +360,8 @@ export const updateAdmittedStudentStatus = async (req, res) => {
 export const updateAdmittedStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
-
-    delete updateData.password;
-    delete updateData.current_year;
+    // Whitelist allowed fields instead of accepting raw body
+    const updateData = pickAllowedFields(req.body, ALLOWED_ADMITTED_UPDATE_FIELDS);
 
     const student = await AdmittedStudents.findByIdAndUpdate(
       id,
@@ -337,9 +382,10 @@ export const updateAdmittedStudent = async (req, res) => {
       data: student
     });
   } catch (error: any) {
+    logger.error(`updateAdmittedStudent error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -347,7 +393,8 @@ export const updateAdmittedStudent = async (req, res) => {
 export const updateCurrentStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    // Whitelist allowed fields instead of accepting raw body
+    const updateData = pickAllowedFields(req.body, ALLOWED_CURRENT_UPDATE_FIELDS);
 
     const student = await MainStudents.findByIdAndUpdate(
       id,
@@ -368,9 +415,10 @@ export const updateCurrentStudent = async (req, res) => {
       data: student
     });
   } catch (error: any) {
+    logger.error(`updateCurrentStudent error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -393,9 +441,10 @@ export const deleteAdmittedStudent = async (req, res) => {
       message: 'Student deleted successfully'
     });
   } catch (error: any) {
+    logger.error(`deleteAdmittedStudent error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -421,9 +470,10 @@ export const deleteCurrentStudent = async (req, res) => {
       message: 'Student deleted successfully'
     });
   } catch (error: any) {
+    logger.error(`deleteCurrentStudent error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -468,9 +518,10 @@ export const addAdmittedStudent = async (req, res) => {
       data: student
     });
   } catch (error: any) {
+    logger.error(`addAdmittedStudent error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -516,9 +567,10 @@ export const addCurrentStudent = async (req, res) => {
       data: student
     });
   } catch (error: any) {
+    logger.error(`addCurrentStudent error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
@@ -534,7 +586,8 @@ export const getStudentRegistrations = async (req: any, res: any) => {
       data: registrations
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    logger.error(`getStudentRegistrations error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -552,7 +605,7 @@ export const updateStudentRegistrationStatus = async (req: any, res: any) => {
         reviewedAt: new Date()
       },
       { new: true }
-    ).populate('student', 'full_name enrollment_number');
+    ).populate('student', 'full_name enrollment_number current_year');
 
     if (!updated) {
       return res.status(404).json({ 
@@ -561,9 +614,32 @@ export const updateStudentRegistrationStatus = async (req: any, res: any) => {
       });
     }
 
+    // Map year of study to numeric level
+    const yearMapping: Record<string, number> = {
+      "ပထမနှစ်": 1,
+      "ဒုတိယနှစ်": 2,
+      "တတိယနှစ်": 3,
+      "စတုတ္ထနှစ်": 4,
+      "ပဉ္စမနှစ်": 5,
+      "Final Year": 6
+    };
+
     // Create Notification and Payment for Student
     const recipientId = updated.student?._id || updated.student;
     if (recipientId) {
+      // Automatic current_year promotion on approval
+      if (status === 'APPROVED') {
+        const studyYearStr = updated.year_of_study;
+        const mappedYear = yearMapping[studyYearStr];
+        
+        if (mappedYear) {
+          await Students.findByIdAndUpdate(recipientId, {
+            current_year: mappedYear,
+            status: 'REGISTERED' // Reset to registered if they were suspended
+          });
+        }
+      }
+
       await Notification.create({
         recipient: recipientId,
         title: `Student Registration ${status}`,
@@ -592,9 +668,10 @@ export const updateStudentRegistrationStatus = async (req: any, res: any) => {
       data: updated
     });
   } catch (error: any) {
+    logger.error(`updateStudentRegistrationStatus error: ${error.message}`);
     res.status(500).json({ 
       success: false,
-      message: error.message 
+      message: 'Server error'
     });
   }
 };
@@ -611,7 +688,8 @@ export const getAllPayments = async (req: any, res: any) => {
       data: payments
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    logger.error(`getAllPayments error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -655,14 +733,13 @@ export const updatePaymentStatus = async (req: any, res: any) => {
       data: updated
     });
   } catch (error: any) {
+    logger.error(`updatePaymentStatus error: ${error.message}`);
     res.status(500).json({ 
       success: false,
-      message: error.message 
+      message: 'Server error'
     });
   }
 };
-
-import PaymentSettings from "../models/paymentSettings.js";
 
 export const getPaymentSettings = async (req: any, res: any) => {
   try {
@@ -678,7 +755,8 @@ export const getPaymentSettings = async (req: any, res: any) => {
       data: settings
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`getPaymentSettings error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -710,7 +788,7 @@ export const updatePaymentSettings = async (req: any, res: any) => {
       data: settings
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`updatePaymentSettings error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
