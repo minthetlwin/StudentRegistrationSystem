@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, User, ShieldCheck, HelpCircle, FileText, LayoutDashboard } from 'lucide-react'
+import { Menu, X, User, HelpCircle, FileText } from 'lucide-react'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
 
   const navLinks = [
-    { name: 'ဖောင်တင်ရန်', path: '/register', icon: FileText },
-    { name: 'အကူအညီ', path: '/help', icon: HelpCircle },
-    { name: 'Log in', path: '/login', icon: User },
-    // { name: 'Admin', path: '/admin-login', icon: ShieldCheck },
+    { name: 'ဖောင်တင်ရန်', path: '/student/register', icon: FileText },
+    { name: 'အကူအညီ', path: '/student/help', icon: HelpCircle },
+    { name: 'Log in', path: '/auth/login', icon: User },
   ]
 
   const isActive = (path) => location.pathname === path
@@ -21,7 +20,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2 group">
+            <Link to="/student" className="flex items-center space-x-2 group">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                 <span className="text-white font-bold text-xl">S</span>
               </div>

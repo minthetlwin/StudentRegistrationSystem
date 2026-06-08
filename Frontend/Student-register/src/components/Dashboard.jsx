@@ -24,7 +24,7 @@ import StudentRegistrationList from './dashboardComponents/StudentRegistrationLi
 import Notifications from './Notifications';
 import PaymentContainer from '../containers/PaymentContainer';
 import PaymentList from './dashboardComponents/PaymentList';
-import { SkeletonDashboard } from './SkeletonLoaders';
+import { SkeletonDashboard } from '../shared/components/SkeletonLoaders';
 
 export default function Dashboard({
   user,
