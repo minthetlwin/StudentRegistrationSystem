@@ -27,6 +27,31 @@ export const createSemester = async (data) => {
   }
 }
 
+export const getSemesters = async () => {
+  try {
+    const token = localStorage.getItem("adminToken") || localStorage.getItem("token"); // Adjust based on your auth key name
+    return await api.get('/api/admin/semesters', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } catch (error) {
+    const errorMessage = error.data?.message || error.message || "Failed to fetch semesters";
+    throw new Error(errorMessage);
+  }
+};
+
+export const toggleSemesterStatus = async (id, statusData) => {
+  try {
+    // statusData sends payload objects like: { isActive: true } or { isPaymentOpen: false }
+    return await api.put(`/api/admin/semesters/${id}/status`, statusData);
+  } catch (error) {
+    const errorMessage = error.data?.message || error.message || "Failed to update semester status";
+    throw new Error(errorMessage);
+  }
+};
+
+
 export const getDormRegistrations = async () => {
   try {
     return await api.get('/api/admin/dorm-registrations');

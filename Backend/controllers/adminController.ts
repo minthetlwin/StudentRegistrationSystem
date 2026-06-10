@@ -11,6 +11,7 @@ import Notification from "../models/notification.js";
 import Payment from "../models/payment.js";
 import PaymentSettings from "../models/paymentSettings.js";
 import logger from "../utils/logger.js";
+import Students from "../models/mainStudents.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────────
 
@@ -173,19 +174,27 @@ export const addAdmin = async (req, res) => {
     });
   }
 };
-
-export const addSemester = async (req, res) => {
+export const addSemester = async (req: any, res: any) => {
   try {
-    const { name, academicYear, isActive, startDate, endDate } = req.body;
+    const { name, academicYear, isActive, isRegistrationOpen, isPaymentOpen, startDate, endDate } = req.body;
 
+    // 1. Core structural field validation
     if (!name || !academicYear || !startDate || !endDate) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
+    const shouldBeActive = isActive === true || isActive === 'true';
+    if (shouldBeActive) {
+      await Semester.updateMany({}, { isActive: false });
+    }
+
+    // 3. Create the document with the new portal window fields
     const semester = await Semester.create({
       name,
       academicYear,
-      isActive: isActive || false,
+      isActive: shouldBeActive,
+      isRegistrationOpen: isRegistrationOpen === true || isRegistrationOpen === 'true',
+      isPaymentOpen: isPaymentOpen === true || isPaymentOpen === 'true',
       startDate,
       endDate
     });
@@ -198,6 +207,50 @@ export const addSemester = async (req, res) => {
   } catch (error: any) {
     logger.error(`addSemester error: ${error.message}`);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+export const getSemesters = async (req: any, res: any) => {
+  try {
+    // 🔥 Sort by isActive first (true before false), then by newest created date
+    const semesters = await Semester.find({}).sort({ 
+      isActive: -1, 
+      createdAt: -1 
+    });
+
+    return res.status(200).json({
+      success: true,
+      count: semesters.length,
+      data: semesters
+    });
+  } catch (error: any) {
+    logger.error(`getSemesters error: ${error.message}`);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error occurred while fetching semesters." 
+    });
+  }
+};
+
+export const updateSemesterStatus = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // If an admin sets this semester to active, set all other semesters to false first
+    if (updates.isActive === true) {
+      await Semester.updateMany({}, { isActive: false });
+    }
+
+    const updatedSemester = await Semester.findByIdAndUpdate(id, { $set: updates }, { new: true });
+
+    return res.status(200).json({
+      success: true,
+      data: updatedSemester
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

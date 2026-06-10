@@ -192,38 +192,49 @@ export async function getMyRegistrationStatus(req: any, res: any) {
 export async function getPaymentStatus(req: any, res: any) {
   try {
     const studentId = req.student._id;
-    const payment = await Payment.findOne({ student: studentId }).populate("student", "full_name enrollment_number");
-    
-    // Always fetch global settings for the breakdown display
+
+    const payment = await Payment.findOne({
+      student: studentId,
+    }).populate("student", "full_name enrollment_number");
+
     let settings = await PaymentSettings.findOne();
     if (!settings) {
       settings = { feeBreakdown: [], totalAmountRequired: 0 } as any;
     }
 
+    // 1. If NO payment record exists yet in DB
     if (!payment) {
-      return res.json({ 
+      return res.json({
         success: true,
-        exists: false, 
-        amountRequired: settings.totalAmountRequired, 
-        feeBreakdown: settings.feeBreakdown 
+        exists: false,
+        data: {
+          status: "UNPAID",
+          amountRequired: settings.totalAmountRequired,
+          feeBreakdown: settings.feeBreakdown,
+          adminRemark: "",
+        },
       });
     }
-    
-    // If payment exists but it's UNPAID/PENDING without its own snapshot, or we just want to ensure it has the global data for rendering
-    res.json({ 
+
+    // 2. If a payment record DOES exist in DB
+    const paymentObj = payment.toObject();
+    const useLatestSettings = payment.status === "UNPAID" || payment.status === "REJECTED";
+
+    return res.json({
       success: true,
-      exists: true, 
+      exists: true,
       data: {
-        ...payment.toObject(),
-        feeBreakdown: payment.feeBreakdown?.length ? payment.feeBreakdown : settings.feeBreakdown,
-        amountRequired: payment.amountRequired || settings.totalAmountRequired
-      } 
+        ...paymentObj,
+        amountRequired: useLatestSettings ? settings.totalAmountRequired : payment.amountRequired,
+        feeBreakdown: useLatestSettings ? settings.feeBreakdown : payment.feeBreakdown,
+      },
     });
   } catch (error: any) {
     logger.error(`getPaymentStatus error: ${error.message}`);
-    res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
+
 
 export async function submitPayment(req: any, res: any) {
   try {

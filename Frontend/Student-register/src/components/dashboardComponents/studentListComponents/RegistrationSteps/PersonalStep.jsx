@@ -52,9 +52,14 @@ const PersonalStep = () => {
             <input {...register("state_division")} className={inputStyle} />
           </div>
           <div>
-            <label className={labelStyle}>မှတ်ပုံတင်အမှတ်</label>
-            <input {...register("nrc", { required: true })} className={inputStyle} placeholder="၉/မရတ(နိုင်)၁၂၃၄၅၆" />
+            <label className={labelStyle}>Email</label>
+            <input {...register("email")} className={inputStyle} />
           </div>
+          <div>
+            <label className={labelStyle}>သွေးအုပ်စု</label>
+            <input {...register("blood_type")} className={inputStyle} />
+          </div>
+         
           <div>
             <label className={labelStyle}>နိုင်ငံခြားသား</label>
             <select {...register("nationality")} className={inputStyle} >
@@ -62,10 +67,10 @@ const PersonalStep = () => {
               <option value="နိုင်ငံခြားသား">နိုင်ငံခြားသား</option>
             </select>
           </div>
-          <div>
+          {/* <div>
             <label className={labelStyle}>မွေးသက္ကရာဇ်</label>
             <input type="date" {...register("dob", { required: true })} className={inputStyle} />
-          </div>
+          </div> */}
         </div>
 
         {/* Father Info */}
@@ -151,10 +156,10 @@ const PersonalStep = () => {
         {/* Matriculation Info */}
         <h4 className="font-bold text-indigo-600 text-sm border-b pb-2 mt-6">တက္ကသိုလ်ဝင်တန်းစာမေးပွဲ အောင်မြင်သည့် အချက်အလက်</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
+          {/* <div>
             <label className={labelStyle}>ခုံအမှတ်</label>
             <input {...register("matric_roll_no")} className={inputStyle} />
-          </div>
+          </div> */}
           <div>
             <label className={labelStyle}>ခုနှစ်</label>
             <input {...register("matric_year")} className={inputStyle} />

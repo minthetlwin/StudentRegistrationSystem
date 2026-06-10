@@ -14,11 +14,15 @@ export default function PaymentContainer() {
     try {
       setLoading(true);
       const res = await getPaymentStatus();
-      if (res.exists) {
+      
+      // 🔥 THE COMPLETE CONTAINER SYNC FIX
+      if (res.success && res.data) {
         setPaymentData(res.data);
         setAmountRequired(res.data.amountRequired || 0);
         setFeeBreakdown(res.data.feeBreakdown || []);
       } else {
+        // Fallback catch-all if backend shape shifts
+        setPaymentData(null);
         setAmountRequired(res.amountRequired || 0);
         setFeeBreakdown(res.feeBreakdown || []);
       }

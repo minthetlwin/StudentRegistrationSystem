@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, secondsToMilliseconds } from 'framer-motion';
 import { 
   LayoutDashboard, 
   User, 
@@ -13,7 +13,8 @@ import {
   Building2,
   Bell,
   CreditCard,
-  Lock
+  Lock,
+  BookAIcon
 } from 'lucide-react';
 import Setting from './dashboardComponents/Setting';
 import DormRegistrationContainer from '../containers/DormRegistrationContainer';
@@ -25,6 +26,7 @@ import Notifications from './Notifications';
 import PaymentContainer from '../containers/PaymentContainer';
 import PaymentList from './dashboardComponents/PaymentList';
 import { SkeletonDashboard } from './SkeletonLoaders';
+import SemesterContainer from '../containers/SemesterContainer';
 
 export default function Dashboard({
   user,
@@ -53,6 +55,7 @@ export default function Dashboard({
     { id: 'payment', label: 'Payments', icon: CreditCard },
     { id: 'registrars', label: 'Member Registration', icon: FileText },
     { id: 'students', label: 'Students', icon: User },
+    { id: 'semesters', label: 'Manage Semesters', icon: LayoutDashboard },
     { id: 'setting', label: 'Settings', icon: Settings },
   ];
 
@@ -229,6 +232,10 @@ export default function Dashboard({
               {(role === "admin" || role === "superadmin") && activeSection === 'registrars' && (
                 <StudentRegistrationList user={user} role={role} />
               )}
+
+             {(role === "admin" || role === "superadmin") && activeSection === 'semesters' && (
+  <SemesterContainer user={user} role={role} />
+)}
               
               {role === "student" && activeSection === 'info-register' && (
                 <InfoRegister user={user} role={role} onComplete={() => setActiveSection('dorms')} />

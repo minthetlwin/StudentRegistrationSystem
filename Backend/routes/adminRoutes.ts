@@ -2,6 +2,8 @@ import express from "express";
 import {
   addAdmin,
   addSemester,
+  getSemesters,
+  updateSemesterStatus,
   getDormRegistrations,
   updateDormStatus,
   getNewAdmittedStudents,
@@ -28,7 +30,9 @@ const router = express.Router();
 router.post("/add-admin", protectAdmin, requireSuperAdmin, addAdmin);
 
 // Admin routes (all protected)
+router.get("/semesters",protectAdmin, getSemesters);
 router.post("/add-semester", protectAdmin, addSemester);
+router.put("/semesters/:id/status", protectAdmin, updateSemesterStatus);
 router.get("/dorm-registrations", protectAdmin, getDormRegistrations);
 router.put("/dorm-registrations/:id/status", protectAdmin, updateDormStatus);
 

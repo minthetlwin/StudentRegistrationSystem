@@ -6,10 +6,11 @@ const PaymentSchema = new mongoose.Schema({
     ref: "Students",
     required: true,
   },
-  semester: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Semester",
-  },
+  semester: { 
+  type: mongoose.Schema.Types.ObjectId, 
+  ref: 'Semester', 
+  required: true 
+},
   amountRequired: {
     type: Number,
     required: true,
