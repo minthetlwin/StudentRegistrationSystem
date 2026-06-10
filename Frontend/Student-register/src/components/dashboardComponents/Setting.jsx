@@ -12,7 +12,6 @@ import {
   CreditCard
 } from 'lucide-react';
 import AddAdmin from './settingComponents/addAdmin';
-import AddSemester from './settingComponents/addSemester';
 
 export default function Profile({ user }) {
   const [activeTab, setActiveTab] = useState(user?.role === 'student' ? 'info' : 'password');
@@ -21,13 +20,12 @@ export default function Profile({ user }) {
     { id: 'info', label: 'Personal Info', icon: User },
     { id: 'password', label: 'Change Password', icon: Lock },
     { id: 'addadmin', label: 'Add Admin', icon: UserPlus },
-    { id: 'addsemester', label: 'Add Semester', icon: PlusCircle }
   ];
 
   const roleTabsMap = {
     student: ['info', 'password'],
     admin: ['info', 'password'],
-    superadmin: ['password', 'addadmin', 'addsemester']
+    superadmin: ['password', 'addadmin']
   };
 
   const availableTabs = tabs.filter(tab =>
@@ -163,9 +161,7 @@ export default function Profile({ user }) {
               {activeTab === 'addadmin' && user?.role === "superadmin" && (
                 <AddAdmin />
               )}
-              {activeTab === 'addsemester' && user?.role === "superadmin" && (
-                <AddSemester />
-              )}
+              
             </motion.div>
           </AnimatePresence>
         </div>

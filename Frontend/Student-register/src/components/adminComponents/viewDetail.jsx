@@ -17,8 +17,14 @@ export default function viewDetail({
   const getStatusColor = (status) => {
     switch (status) {
       case "PENDING": return "border-gray-400 text-gray-700";
-      case "APPROVED": return "border-green-500 text-green-700";
-      case "REJECTED": return "border-red-500 text-red-700";
+      case "APPROVED": return "border-green-500 text-green-700 bg-green-50";
+      case "REJECTED": return "border-red-500 text-red-700 bg-red-50";
+      case "REGISTERED": return "border-emerald-500 text-emerald-700 bg-emerald-50";
+      case "SUSPENDED": return "border-amber-500 text-amber-700 bg-amber-50";
+      case "TRANSFERRED": return "border-slate-400 text-slate-600 bg-slate-50";
+      case "LEFT": return "border-rose-400 text-rose-600 bg-rose-50";
+      case "GRADUATED": return "border-indigo-500 text-indigo-700 bg-indigo-50";
+      case "BLOCKED": return "border-black text-black bg-gray-100";
       default: return "border-gray-400 text-gray-700";
     }
   };
@@ -93,7 +99,7 @@ export default function viewDetail({
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                  <p className="text-gray-900">{studentData?.year || 'N/A'}</p>
+                  <p className="text-gray-900">{studentData?.current_year || 'N/A'}</p>
                 </div>
               </>
             )}
@@ -101,7 +107,7 @@ export default function viewDetail({
             <div className="flex justify-between items-center">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(studentData?.status)}`}>
+                <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold border ${getStatusColor(studentData?.status)}`}>
                   {studentData?.status || 'Active'}
                 </span>
                 {studentData?.reviewedBy && (

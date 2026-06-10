@@ -41,8 +41,16 @@ export default function CurrentStudentsList({ students, onViewDetails }) {
               </td>
               <td className="px-6 py-4 text-sm text-gray-900">{student.current_year || 'N/A'}</td>
               <td className="px-6 py-4">
-                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                  Active
+                <span className={`inline-flex px-2 py-1 text-[10px] font-bold rounded-full ${
+                  student.status === 'REGISTERED' ? 'bg-emerald-100 text-emerald-800' :
+                  student.status === 'SUSPENDED' ? 'bg-amber-100 text-amber-800' :
+                  student.status === 'TRANSFERRED' ? 'bg-slate-100 text-slate-800' :
+                  student.status === 'LEFT' ? 'bg-rose-100 text-rose-800' :
+                  student.status === 'GRADUATED' ? 'bg-indigo-100 text-indigo-800' :
+                  student.status === 'BLOCKED' ? 'bg-gray-200 text-gray-900' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {student.status || 'ACTIVE'}
                 </span>
               </td>
               <td className="px-6 py-4 text-sm text-gray-500">

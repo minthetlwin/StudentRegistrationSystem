@@ -18,7 +18,9 @@ import {
   Calendar,
   Layers,
   ChevronDown,
-  Info
+  Info,
+  Mail,
+  Droplets
 } from 'lucide-react';
 
 export default function StudentRegistrationDetailModal({ isOpen, onClose, registration, onUpdateStatus }) {
@@ -166,42 +168,43 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
           <section>
             <SectionTitle icon={User} title="Personal Details" subtitle="Official Documentation Data" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <InfoCard label="Full Name (Myanmar)" value={registration.name_mm} icon={User} />
-              <InfoCard label="Full Name (English)" value={registration.name_en} icon={User} />
-              <InfoCard label="NRC Number" value={registration.nrc} icon={ShieldCheck} />
-              <InfoCard label="Date of Birth" value={new Date(registration.dob).toLocaleDateString()} icon={Calendar} />
-              <InfoCard label="Birth place" value={registration.birth_place} icon={MapPin} />
-              <InfoCard label="Religion" value={registration.religion} icon={MapPin} />
-              <InfoCard label="Nationality" value={registration.nationality} icon={MapPin} />
-               
-              <InfoCard label="Contact Phone" value={registration.phone} icon={Smartphone} />
-              <InfoCard label="Permanent Address" value={registration.address} icon={Home} className="md:col-span-2" />
+              <InfoCard label="အမည် (Myanmar)" value={registration.name_mm} icon={User} />
+              <InfoCard label="အမည် (English)" value={registration.name_en} icon={User} />
+              {/* <InfoCard label="မှတ်ပုံတင်အမှတ်" value={registration.nrc} icon={ShieldCheck} />
+              <InfoCard label="မွေးသက္ကရာဇ်" value={new Date(registration.dob).toLocaleDateString()} icon={Calendar} /> */}
+              <InfoCard label="မွေးဖွားရာဇာတိ" value={registration.birth_place} icon={MapPin} />
+              <InfoCard label="ကိုးကွယ်သည့်ဘာသာ" value={registration.religion} icon={MapPin} />
+              <InfoCard label="နိုင်ငံသား" value={registration.nationality} icon={MapPin} />
+              <InfoCard label="အီးမေးလ်" value={registration.email} icon={Mail} />
+              <InfoCard label="သွေးအုပ်စု" value={registration.blood_type} icon={Droplets} />
+
+              <InfoCard label="ဖုန်းနံပါတ်" value={registration.phone} icon={Smartphone} />
+              <InfoCard label="နေရပ်လိပ်စာ" value={registration.address} icon={Home} className="md:col-span-2" />
             </div>
           </section>
 
           {/* 3. Academic Background */}
           <section>
-            <SectionTitle icon={GraduationCap} title="Education History" subtitle="Verified Academic Records" />
+            <SectionTitle icon={GraduationCap} title="တက္ကသိုလ်ဝင်တန်းစာမေးပွဲ အချက်အလက်" subtitle="Verified Academic Records" />
             <div className="space-y-8">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <InfoCard label="ခုမှတ်" value={registration.matric_roll_no} icon={GraduationCap} />
+                {/* <InfoCard label="ခုမှတ်" value={registration.matric_roll_no} icon={GraduationCap} /> */}
                 <InfoCard label="ခုနှစ်" value={registration.matric_year} icon={FileText} />
-                <InfoCard label="စာစစ်ဥှညန" value={registration.matric_dept} icon={Home} />
+                <InfoCard label="စာစစ်ဌာန" value={registration.matric_dept} icon={Home} />
               </div>
               
               <div className="bg-white rounded-[2rem] border border-slate-200 p-8 shadow-sm">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                  <Layers className="w-4 h-4" /> Previous University Exams
-                </h4>
+                  <Layers className="w-4 h-4" /> အရင် exam results များ         </h4>
                 <div className="overflow-hidden border border-slate-100 rounded-2xl">
                   <table className="w-full text-left">
                     <thead className="bg-slate-50/80 border-b border-slate-100">
                       <tr>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Academic Year</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Major</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Roll Number / ID</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">year</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Pass / Fail</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">ဖြေဆိုခဲ့သည့်စာမေးပွဲများ</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">အဓိကဘာသာ</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">ခုံအမှတ်</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">ခုနှစ်</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">အောင် / ရှုံး</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -231,7 +234,7 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
               {/* Father */}
               <div className="bg-white p-6 rounded-[2rem] border border-slate-200 space-y-4">
                 <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2 mb-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" /> Father's Data
+                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" /> ဖခင် အချက်အလက်များ
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between py-2 border-b border-slate-50">
@@ -243,27 +246,27 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
                     <span className="text-sm font-black text-slate-900">{registration.father_name_en}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">မှတ်ပုံတင်အမှတ်</span>
                     <span className="text-sm font-black text-indigo-600">{registration.father_nrc}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">လူမျိုး</span>
                     <span className="text-sm font-black text-indigo-600">{registration.father_race}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">ကိုးကွယ်သည့်ဘာသာ</span>
                     <span className="text-sm font-black text-indigo-600">{registration.father_religion}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">မွေးဖွားရာဇာတိ</span>
                     <span className="text-sm font-black text-indigo-600">{registration.father_birth_place}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">မြို့နယ်/ပြည်နယ်/တိုင်း</span>
                     <span className="text-sm font-black text-indigo-600">{registration.father_state_division}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">နိုင်ငံသား/နိုင်ငံခြားသား</span>
                     <span className="text-sm font-black text-indigo-600">{registration.father_nationality}</span>
                   </div>
                 </div>
@@ -271,7 +274,7 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
               {/* Mother */}
               <div className="bg-white p-6 rounded-[2rem] border border-slate-200 space-y-4">
                 <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2 mb-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" /> Mother's Data
+                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />မိခင် အချက်အလက်များ
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between py-2 border-b border-slate-50">
@@ -283,27 +286,27 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
                     <span className="text-sm font-black text-slate-900">{registration.mother_name_en}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">မှတ်ပုံတင်အမှတ်</span>
                     <span className="text-sm font-black text-indigo-600">{registration.mother_nrc}</span>
                   </div>
                      <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">လူမျိုး</span>
                     <span className="text-sm font-black text-indigo-600">{registration.mother_race}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">ကိုးကွယ်သည့်ဘာသာ</span>
                     <span className="text-sm font-black text-indigo-600">{registration.mother_religion}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">မွေးဖွားရာဇာတိ</span>
                     <span className="text-sm font-black text-indigo-600">{registration.mother_birth_place}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">မြို့နယ်/ပြည်နယ်/တိုင်း</span>
                     <span className="text-sm font-black text-indigo-600">{registration.mother_state_division}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">NRC Number</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">နိုင်ငံသား/နိုင်ငံခြားသား</span>
                     <span className="text-sm font-black text-indigo-600">{registration.mother_nationality}</span>
                   </div>
                 </div>
@@ -313,7 +316,7 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
 
           {/* 5. Guarantor Information */}
           <section className="mb-10">
-            <SectionTitle icon={ShieldCheck} title="Guarantor Details" subtitle="Financial & Conduct Responsibility" />
+            <SectionTitle icon={ShieldCheck} title="ကျောင်းနေရန် အထောက်" subtitle="Financial & Conduct Responsibility" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InfoCard label="Guarantor Name" value={registration.guarantor_name} icon={User} />
               <InfoCard label="Relationship" value={registration.guarantor_relation} icon={Users} />

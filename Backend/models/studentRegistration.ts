@@ -7,19 +7,27 @@ const studentRegistrationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Students",
       required: true,
-      unique: true, // one registration per student
     },
 
+    // Link to concrete semester
+    semester: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Semester",
+      required: true,
+    },
+
+    
+
     // ── Step 1: Academic Info ─────────────────────────────────────────────────
-    academic_year: { type: String, required: true },   // e.g. "2024-2025"
+      
     year_of_study: { 
       type: String, 
-      enum: ["ပထမနှစ်", "ဒုတိယနှစ်", "တတိယနှစ်", "စတုတ္ထနှစ်", "ပဉ္စမနှစ်", "Final Year"], 
+      enum: ["ပထမနှစ်", "ဒုတိယနှစ်", "တတိယနှစ်", "စတုတ္ထနှစ်", "ပဉ္စမနှစ်"], 
       required: true 
     },
     major: { type: String, enum: ["CS", "CT","none"], required: true },
-    roll_no: { type: String, required: true },          // e.g. "1-CS-1"
-    reg_no: { type: String },                           // university reg no
+    // roll_no: { type: String, required: true },           //this should be G-12 
+    // reg_no: { type: String },                           // university reg no //optionl
     yr_no: { type: String },                            // university entrance year
 
     // Previous Exam Results (for senior students)
@@ -38,11 +46,13 @@ const studentRegistrationSchema = new mongoose.Schema(
     name_en: { type: String, required: true },          // English name
     race: { type: String },                             // လူမျိုး
     religion: { type: String },                         // ကိုးကွယ်သည့်ဘာသာ
-    dob: { type: Date, required: true },                // မွေးသက္ကရာဇ်
+    // dob: { type: Date, required: true },                // မွေးသက္ကရာဇ်
     birth_place: { type: String },                      // မွေးဖွားရာဇာတိ
     state_division: { type: String },                   // မြို့နယ်/ပြည်နယ်/တိုင်း
-    nrc: { type: String, required: true },              // မှတ်ပုံတင်အမှတ်
+    // nrc: { type: String, required: true },              // မှတ်ပုံတင်အမှတ်
     nationality: { type: String },                      // နိုင်ငံသား/နိုင်ငံခြားသား
+    email : { type: String, required: true },                // အီးမေးလ်
+    blood_type: { type: String, enum: ["A", "B", "AB", "O"] }, // သွေးအုပ်စု
 
     // Father Info
     father_name: { type: String },
@@ -65,7 +75,7 @@ const studentRegistrationSchema = new mongoose.Schema(
     mother_nationality: { type: String },
 
     // Matriculation Exam Info (တက္ကသိုလ်ဝင်တန်းစာမေးပွဲ)
-    matric_roll_no: { type: String },                   // ခုံအမှတ်
+    // matric_roll_no: { type: String },                   // ခုံအမှတ်
     matric_year: { type: String },                      // ခုနှစ်
     matric_dept: { type: String },                      // စာစစ်ဌာန
 
@@ -105,5 +115,8 @@ const studentRegistrationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// One registration per student per semester
+studentRegistrationSchema.index({ student: 1, semester: 1 }, { unique: true });
 
 export default mongoose.model("StudentRegistration", studentRegistrationSchema);

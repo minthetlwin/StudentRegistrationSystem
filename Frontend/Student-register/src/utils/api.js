@@ -1,6 +1,6 @@
 /**
  * Standardized API utility using the native Fetch API.
- * Handles token management, headers, and error parsing.
+ * Handles token management, headers, error parsing, and 401 auto-redirect.
  */
 
 const getAuthHeaders = () => {
@@ -14,9 +14,33 @@ const getAuthHeaders = () => {
   return headers;
 };
 
+/**
+ * Handle 401 responses globally — clear auth state and redirect to login.
+ */
+const handleUnauthorized = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("role");
+  // Only redirect if not already on a public page
+  if (
+    !window.location.pathname.includes("/login") &&
+    !window.location.pathname.includes("/admin-login") &&
+    !window.location.pathname.includes("/register") &&
+    window.location.pathname !== "/"
+  ) {
+    window.location.href = "/login";
+  }
+};
+
 const handleResponse = async (response) => {
   const data = await response.json();
   if (!response.ok) {
+    // Auto-redirect on 401 (expired / invalid token)
+    if (response.status === 401) {
+      handleUnauthorized();
+    }
+
+    // Build a rich error object that preserves status + server data
     const error = new Error(data.message || "API request failed");
     error.status = response.status;
     error.data = data;

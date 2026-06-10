@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../components/Dashboard';
-
+import { SkeletonDashboard } from '../components/SkeletonLoaders';
 
 import { getMyRegistrationStatus } from '../services/studentAPI';
 

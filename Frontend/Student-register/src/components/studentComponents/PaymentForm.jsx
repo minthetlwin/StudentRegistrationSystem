@@ -10,6 +10,20 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
     setCurrentDate(new Date().toLocaleString());
   }, []);
 
+const isApproved = paymentData?.status === "APPROVED";
+const isRejected = paymentData?.status === "REJECTED";
+const isPending = paymentData?.status === "PENDING";
+const isUnpaid = !paymentData || paymentData?.status === "UNPAID";
+
+  // 🔥 FIX: Track live admin updates if the status is UNPAID or REJECTED. 
+  // Only lock the amounts permanently if the transaction is pending review or approved.
+const displayAmount = paymentData?.amountRequired ?? amountRequired ?? 0;
+const displayBreakdown = paymentData?.feeBreakdown?.length > 0 
+  ? paymentData.feeBreakdown 
+  : feeBreakdown;
+
+
+  
   const handleDownload = () => {
     const studentName = paymentData?.student?.full_name || 'N/A';
     const studentId = paymentData?.student?.enrollment_number || paymentData?._id?.slice(-6).toUpperCase() || 'N/A';
@@ -26,14 +40,13 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
     ctx.fillStyle = '#fdfbf7'; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#1e293b'; // slate-800
+    ctx.fillStyle = '#1e293b'; 
     ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'center';
     
     let y = 50;
     ctx.fillText('OFFICIAL RECEIPT', 300, y);
     
-    // Divider
     ctx.beginPath();
     ctx.moveTo(200, y + 10);
     ctx.lineTo(400, y + 10);
@@ -52,7 +65,6 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
     ctx.fillText(`Student ID:`, 50, y); 
     ctx.fillText(studentId, 180, y); y += 50;
     
-    // Dotted line header
     ctx.font = 'bold 16px sans-serif';
     ctx.fillText('Description', 50, y);
     ctx.textAlign = 'right';
@@ -67,7 +79,7 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
         ctx.moveTo(50, yPos);
         ctx.lineTo(550, yPos);
         ctx.lineWidth = 1;
-        ctx.strokeStyle = '#94a3b8'; // slate-400
+        ctx.strokeStyle = '#94a3b8'; 
         ctx.stroke();
         ctx.setLineDash([]);
     };
@@ -94,7 +106,6 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
     ctx.textAlign = 'right';
     ctx.fillText(`ကျပ် ${displayAmount?.toLocaleString()}/-`, 550, y);
     
-    // Download logic
     const link = document.createElement('a');
     link.download = `Receipt_${studentId}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -129,16 +140,13 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
       setError("Slip image is required.");
       return;
     }
-    onSubmit({ slip_image: slipImage });
+    // Pass the fresh tracking values back to your API during submission 
+    onSubmit({ 
+      slip_image: slipImage,
+      amountRequired: displayAmount,
+      feeBreakdown: displayBreakdown
+    });
   };
-
-  const isApproved = paymentData?.status === "APPROVED";
-  const isRejected = paymentData?.status === "REJECTED";
-  const isPending = paymentData?.status === "PENDING";
-  const isUnpaid = !paymentData || paymentData?.status === "UNPAID";
-
-  const displayAmount = paymentData ? paymentData.amountRequired : amountRequired;
-  const displayBreakdown = paymentData?.feeBreakdown?.length > 0 ? paymentData.feeBreakdown : feeBreakdown;
 
   return (
     <div className="glass-card shadow-lg w-full max-w-lg mx-auto p-8 rounded-3xl space-y-6">
@@ -168,10 +176,9 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
         </div>
       )}
 
-      {/* Traditional Paper Receipt Fee Breakdown */}
+      {/* Fee Breakdown Display */}
       {displayBreakdown && displayBreakdown.length > 0 ? (
         <div className="bg-[#fdfbf7] border border-slate-300 rounded-sm mb-6 shadow-md relative overflow-hidden font-sans">
-          {/* Subtle texture / top edge */}
           <div className="h-2 bg-indigo-600 w-full absolute top-0 left-0"></div>
           
           <div className="p-8 pt-10">
@@ -183,7 +190,6 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
               {displayBreakdown.map((fee, index) => (
                 <div key={index} className="flex items-end justify-between font-medium text-slate-800">
                   <span className="whitespace-nowrap">{fee.description}</span>
-                  {/* Dot Leader */}
                   <span className="flex-grow border-b-2 border-dotted border-slate-400 mx-2 relative top-[-4px]"></span>
                   <span className="whitespace-nowrap font-bold">ကျပ် {fee.amount?.toLocaleString()}/-</span>
                 </div>
@@ -197,12 +203,6 @@ export default function PaymentForm({ paymentData, amountRequired, feeBreakdown 
                 <span className="whitespace-nowrap">ကျပ် {displayAmount?.toLocaleString()}/-</span>
               </div>
             </div>
-
-            {/* <div className="mt-8 flex justify-between text-xs text-slate-500 italic">
-              <span>Downloaded: {currentDate}</span>
-              <span>Chalan No: {paymentData?._id?.slice(-6).toUpperCase() || 'N/A'}</span>
-            </div> */}
-            
           </div>
         </div>
       ) : (

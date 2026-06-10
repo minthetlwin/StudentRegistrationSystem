@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import Students from "../models/mainStudents.js";
 import adminUser from "../models/adminUser.js";
+import logger from "../utils/logger.js";
 
 
 export const protectStudent = async (req, res, next) => {
@@ -21,13 +22,13 @@ export const protectStudent = async (req, res, next) => {
       const student = await Students.findById(decoded.studentId).select("-password");
 
       if (!student) {
-        return res.status(401).json({ success: false, message: "Student not found" });
+        return res.status(401).json({ success: false, message: "Not authorized, invalid token" });
       }
 
       req.student = student; // Available in next middleware or route
       next();
     } catch (error: any) {
-      console.error("Auth Middleware Error:", error);
+      logger.error(`Auth Middleware Error: ${error.message}`);
       res.status(401).json({ success: false, message: "Not authorized, invalid token" });
     }
   } else {
@@ -52,16 +53,35 @@ export const protectAdmin = async (req, res, next) => {
       const admin = await adminUser.findById(decoded.id).select("-password");
 
       if (!admin) {
-        return res.status(401).json({ success: false, message: "Admin not found" });
+        return res.status(401).json({ success: false, message: "Not authorized, invalid token" });
+      }
+
+      // Check if admin account is active
+      if (!admin.isActive) {
+        return res.status(403).json({ success: false, message: "Account is deactivated" });
       }
 
       req.user = admin; // Available in next middleware or route
       next();
     } catch (error: any) {
-      console.error("Admin Auth Middleware Error:", error);
+      logger.error(`Admin Auth Middleware Error: ${error.message}`);
       res.status(401).json({ success: false, message: "Not authorized, invalid token" });
     }
   } else {
     res.status(401).json({ success: false, message: "No token, authorization denied" });
   }
+};
+
+/**
+ * RBAC middleware: restrict access to superadmin-only actions.
+ * Must be used AFTER protectAdmin.
+ */
+export const requireSuperAdmin = (req, res, next) => {
+  if (req.user?.role !== 'superadmin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Superadmin privileges required.'
+    });
+  }
+  next();
 };

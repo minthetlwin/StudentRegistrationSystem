@@ -1,106 +1,123 @@
-import React, { useState } from "react";
-import StudentVerifyForm from "../components/authComponents/StudentVerifyForm.jsx";
-import StudentPasswordForm from "../components/authComponents/SetPasswordForm.jsx";
-import { verifyStudent, setStudentPassword } from "../services/authServices";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import PaymentForm from "../components/studentComponents/PaymentForm";
+import { getPaymentStatus, submitPayment } from "../services/studentAPI";
+import { SkeletonCard } from "../components/SkeletonLoaders";
+import { Lock } from "lucide-react"; // Import lock icon for closed portals
 
-export default function StudentPasswordContainer() {
-  const [step, setStep] = useState("verify"); // verify -> password -> completed
-  const [loading, setLoading] = useState(false);
-  const [student, setStudent] = useState(null);
-  const [message, setMessage] = useState("");
+export default function PaymentContainer() {
+  const [loading, setLoading] = useState(true);
+  const [paymentData, setPaymentData] = useState(null);
+  const [amountRequired, setAmountRequired] = useState(0);
+  const [feeBreakdown, setFeeBreakdown] = useState([]);
+  const [error, setError] = useState("");
+  
+  // 🔥 NEW STATES FOR SEMESTER CONTROL
+  const [isLocked, setIsLocked] = useState(false);
+  const [semesterInfo, setSemesterInfo] = useState(null);
 
-  const navigate = useNavigate();
-  const handleVerify = async (data) => {
-    setLoading(true);
-    setMessage("");
+  const loadData = async () => {
     try {
-      const result = await verifyStudent(data);
-      if (result.success) {
-        // Store student data or fallback to form data
-        const studentData = result.student || {
-          nrc: data.nrcNumber,
-          date_of_birth: data.dateOfBirth,
-          g12_exam_id: data.g12ExamId
-        };
-        setStudent(studentData);
-        setStep("password");
-        setMessage("✓ Verification successful. Please set your password.");
-      } else {
-        setMessage("✗ " + (result.message || "Verification failed"));
-      }
-    } catch (err) {
-      setMessage("✗ " + (err.message || "Verification failed. Please check your details."));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSetPassword = async (data) => {
-    setLoading(true);
-    setMessage("");
-    try {
-      if (!student) {
-        setMessage("✗ Student data not found. Please verify again.");
-        setStep("verify");
+      setLoading(true);
+      setError("");
+      const res = await getPaymentStatus();
+      
+      // 1. 🔥 Check if admin closed the payment window for this semester
+      if (res.isLocked) {
+        setIsLocked(true);
+        setSemesterInfo(res.semester); // e.g., { id: "...", name: "Semester 1" }
         return;
       }
-      
-      const payload = { 
-        ...data, 
-        nrc: student.nrc, 
-        date_of_birth: student.date_of_birth 
-      };
-      // console.log('Setting password with payload:', payload);
-      
-      const result = await setStudentPassword(payload);
-      if (result.success) {
-        setStep("completed");
-        setMessage("✓ Password set successfully. You can now login.");
+
+      setIsLocked(false);
+
+      // 2. 🔥 Parse data from the semester-scoped response shape
+      if (res.success && res.data) {
+        setPaymentData(res.data);
+        setAmountRequired(res.data.amountRequired || 0);
+        setFeeBreakdown(res.data.feeBreakdown || []);
+        // Save semester details from inside the payment record or fallback root
+        setSemesterInfo(res.data.semester || res.semester || null);
       } else {
-        setMessage("✗ " + (result.message || "Password setup failed"));
+        setPaymentData(null);
+        setAmountRequired(res.amountRequired || 0);
+        setFeeBreakdown(res.feeBreakdown || []);
+        setSemesterInfo(res.semester || null);
       }
     } catch (err) {
-      setMessage("✗ " + (err.message || "Password setup failed. Please try again."));
+      setError(err?.message || "Failed to load payment information.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        {loading && (
-          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4 text-center">
-            Loading...
-          </div>
-        )}
-        {message && (
-          <div className={`px-4 py-3 rounded mb-4 text-center font-medium ${
-            message.startsWith('✓') 
-              ? 'bg-green-100 border border-green-400 text-green-700' 
-              : 'bg-red-100 border border-red-400 text-red-700'
-          }`}>
-            {message}
-          </div>
-        )}
+  useEffect(() => {
+    loadData();
+  }, []);
 
-        {step === "verify" && <StudentVerifyForm onVerify={handleVerify} />}
-        {step === "password" && <StudentPasswordForm onSetPassword={handleSetPassword} />}
-        {step === "completed" && (
-          <div className="bg-white rounded-xl shadow-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Setup Completed!</h2>
-            <p className="text-gray-600">You can now login with your credentials.</p>
-              <button
-          onClick={() => navigate("/login")}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-        >
-          Go to Login
-        </button>
-          </div>
-         
-        )}
+  const handleSubmit = async (formData) => {
+    try {
+      setLoading(true);
+      
+      // 3. 🔥 Attach the active semester ID before sending to backend
+      const payload = {
+        ...formData,
+        semesterId: semesterInfo?._id || semesterInfo?.id || semesterInfo
+      };
+
+      await submitPayment(payload);
+      await loadData();
+    } catch (err) {
+      setError(err?.message || "Failed to submit payment slip.");
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full">
+        <SkeletonCard />
       </div>
+    );
+  }
+
+  // 4. 🔥 Lock Screen UI if Admin turned off payment window
+  if (isLocked) {
+    return (
+      <div className="glass-card p-12 rounded-3xl text-center space-y-4 max-w-lg mx-auto shadow-lg">
+        <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto animate-pulse">
+          <Lock className="w-10 h-10 text-amber-600" />
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900">Payment Window Closed</h3>
+        <p className="text-slate-500 max-w-sm mx-auto">
+          The payment portal for <span className="font-semibold text-slate-800">{semesterInfo?.name || "the current semester"}</span> is currently closed by administration.
+        </p>
+        <p className="text-xs text-slate-400">Please check back later or contact support if you think this is a mistake.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-xl">
+          {error}
+        </div>
+      )}
+      
+      {/* Optional: Add a small banner reminding which semester they are paying for */}
+      {semesterInfo?.name && (
+        <div className="max-w-lg mx-auto mb-4 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+          Active Billing Cycle: {semesterInfo.name} ({semesterInfo.academicYear || "Current Year"})
+        </div>
+      )}
+
+      <PaymentForm
+        paymentData={paymentData}
+        amountRequired={amountRequired}
+        feeBreakdown={feeBreakdown}
+        onSubmit={handleSubmit}
+        loading={loading}
+      />
     </div>
   );
 }

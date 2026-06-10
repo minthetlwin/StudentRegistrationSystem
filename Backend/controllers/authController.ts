@@ -2,6 +2,8 @@ import AdmittedStudents  from "../models/admittedStudents.js";
 import  Students  from "../models/mainStudents.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { validatePassword } from "../utils/passwordValidator.js";
+import logger from "../utils/logger.js";
 
 export const verifyAdmittedStudent = async (req, res) => {
   try {
@@ -75,6 +77,7 @@ export const verifyAdmittedStudent = async (req, res) => {
     return res.status(200).json(responseData);
 
   } catch (error: any) {
+    logger.error(`verifyAdmittedStudent error: ${error.message}`);
     return res.status(500).json({
       success: false,
       message: "Server error"
@@ -92,6 +95,12 @@ export const setStudentPassword = async (req, res) => {
 
     if (new_password !== confirm_password) {
       return res.status(400).json({ success: false, message: "Passwords do not match" });
+    }
+
+    // Validate password complexity
+    const passwordValidation = validatePassword(new_password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({ success: false, message: passwordValidation.message });
     }
 
     // Check if student exists in CurrentStudents (transfer student)
@@ -144,7 +153,8 @@ export const setStudentPassword = async (req, res) => {
     res.json({ success: true, message: "Password set successfully" });
 
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message || "Server error" });
+    logger.error(`setStudentPassword error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -163,14 +173,29 @@ export const loginStudent = async (req, res) => {
     });
 
     if (!student) {
-      return res.status(404).json({ success: false, message: "Student not found or NRC mismatch" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    // Validate DOB (Part of credentials for students)
+    const inputDate = new Date(date_of_birth).toISOString().split("T")[0];
+    const storedDate = new Date(student.date_of_birth).toISOString().split("T")[0];
+
+    if (inputDate !== storedDate) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
     // Validate password
     const isPasswordValid = await bcrypt.compare(password, student.password as string);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ success: false, message: "Invalid password" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    // Check student status
+    if (["TRANSFERRED", "LEFT", "BLOCKED"].includes(student.status)) {
+      let statusMsg = "Your account is no longer active.";
+      if (student.status === "BLOCKED") statusMsg = "Your account has been blocked.";
+      return res.status(403).json({ success: false, message: statusMsg });
     }
 
     // Create JWT token
@@ -179,7 +204,7 @@ export const loginStudent = async (req, res) => {
         studentId: student._id, 
         role: student.role || 'student'
       },
-      process.env.JWT_SECRET || 'fallback_secret',
+      process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
     );
 
@@ -195,6 +220,7 @@ export const loginStudent = async (req, res) => {
     });
 
   } catch (error: any) {
+    logger.error(`loginStudent error: ${error.message}`);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

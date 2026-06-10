@@ -13,9 +13,25 @@ import mongoose from "mongoose";
 
 dotenv.config();
 
+// ── Mandatory env checks ────────────────────────────────────────────────────
+if (!process.env.JWT_SECRET) {
+  logger.error('FATAL: JWT_SECRET environment variable is not set. Exiting.');
+  process.exit(1);
+}
+if (!process.env.MONGO_URI) {
+  logger.error('FATAL: MONGO_URI environment variable is not set. Exiting.');
+  process.exit(1);
+}
+
 const app = express();
+
+// ── CORS – driven by env or safe defaults ───────────────────────────────────
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',')
+  : ['http://localhost:5173', 'http://frontend:5173'];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://frontend:5173'],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(helmet());
@@ -58,6 +74,15 @@ mongoose.connection.on("error", (err) => {
   logger.error(`MongoDB connection error: ${err.message}`);
 });
 
+// ── Global error handler (catches unhandled route / middleware errors) ───────
+app.use((err: any, _req: any, res: any, _next: any) => {
+  logger.error(`Unhandled error: ${err.stack || err.message}`);
+  res.status(err.status || 500).json({
+    success: false,
+    message: 'Server error'
+  });
+});
+
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`Server running on port ${PORT}`);
@@ -69,5 +94,5 @@ server.on('error', (err) => {
 });
 
 process.on('unhandledRejection', (err: any) => {
-  logger.error(`Unhandled rejection: ${err.message}`);
+  logger.error(`Unhandled rejection: ${err?.message || err}`);
 });

@@ -2,15 +2,17 @@ import DormRegistration from "../models/dormRegistration.js";
 import Semester from "../models/semesterUni.js";
 import StudentRegistration from "../models/studentRegistration.js";
 import Payment from "../models/payment.js";
+import PaymentSettings from "../models/paymentSettings.js";
 import { saveBase64Image } from "../utils/fileUpload.js";
-import mongoose from "mongoose";
+import logger from "../utils/logger.js";
 
 export async function getDashboard(req, res) {
   try {
     const student = req.student;
-    res.json({ student });
+    res.json({ success: true, student });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    logger.error(`getDashboard error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
@@ -20,7 +22,7 @@ export async function registerDorm(req, res) {
 
     const activeSemester = await Semester.findOne({ isActive: true });
     if (!activeSemester) {
-      return res.status(400).json({ message: "No active semester" });
+      return res.status(400).json({ success: false, message: "No active semester" });
     }
 
     // Check if student already submitted for this semester
@@ -30,7 +32,7 @@ export async function registerDorm(req, res) {
     });
 
     if (exists) {
-      return res.status(400).json({ message: "Already submitted" });
+      return res.status(400).json({ success: false, message: "Already submitted" });
     }
 
     const form = await DormRegistration.create({
@@ -48,7 +50,8 @@ export async function registerDorm(req, res) {
     });
 
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    logger.error(`registerDorm error: ${err.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
@@ -62,18 +65,21 @@ export async function getMyDormRegistration(req, res) {
 
     if (!record) {
       return res.json({
+        success: true,
         exists: false,
         message: "No dorm registration found for you",
       });
     }
 
     res.json({
+      success: true,
       exists: true,
       data: record,
     });
 
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    logger.error(`getMyDormRegistration error: ${err.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
@@ -81,20 +87,30 @@ export async function submitStudentRegistration(req: any, res: any) {
   try {
     const studentId = req.student._id;
 
-    // Check if registration already exists
-    const existingRegistration = await StudentRegistration.findOne({ student: studentId });
+    // Get active semester
+    const activeSemester = await Semester.findOne({ isActive: true });
+    if (!activeSemester) {
+      return res.status(400).json({ success: false, message: "No active semester for registration." });
+    }
+
+    // Check if registration already exists for THIS semester
+    const existingRegistration = await StudentRegistration.findOne({ 
+      student: studentId,
+      semester: activeSemester._id 
+    });
+
     if (existingRegistration && existingRegistration.status !== 'REJECTED') {
       return res.status(400).json({ 
         success: false, 
-        message: "You have already submitted a registration or your registration is being processed." 
+        message: `You have already submitted a registration for ${activeSemester.name} or it is being processed.` 
       });
     }
 
     const { profile_photo, live_photo, ...formData } = req.body;
 
-    // Save photos to disk
-    const profile_photo_url = saveBase64Image(profile_photo, 'profile');
-    const live_photo_url = saveBase64Image(live_photo, 'live');
+    // Save photos to disk (async)
+    const profile_photo_url = await saveBase64Image(profile_photo, 'profile');
+    const live_photo_url = await saveBase64Image(live_photo, 'live');
 
     if (!profile_photo_url || !live_photo_url) {
       return res.status(400).json({ success: false, message: "Invalid photo data" });
@@ -103,9 +119,9 @@ export async function submitStudentRegistration(req: any, res: any) {
     // Create or Update registration
     let registration;
     if (existingRegistration && existingRegistration.status === 'REJECTED') {
-      // Re-submission
+      // Re-submission for this semester
       registration = await StudentRegistration.findOneAndUpdate(
-        { student: studentId },
+        { _id: existingRegistration._id },
         { 
           ...formData, 
           profile_photo_url, 
@@ -116,9 +132,10 @@ export async function submitStudentRegistration(req: any, res: any) {
         { new: true }
       );
     } else {
-      // New submission
+      // New submission for this semester
       registration = await StudentRegistration.create({
         student: studentId,
+        semester: activeSemester._id,
         ...formData,
         profile_photo_url,
         live_photo_url,
@@ -133,21 +150,33 @@ export async function submitStudentRegistration(req: any, res: any) {
     });
 
   } catch (error: any) {
-    console.error("Registration Submission Error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`submitStudentRegistration error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
 export async function getMyRegistrationStatus(req: any, res: any) {
   try {
     const studentId = req.student._id;
-    const registration = await StudentRegistration.findOne({ student: studentId });
+
+    // Get active semester to check current status
+    const activeSemester = await Semester.findOne({ isActive: true });
+    
+    // Find registration for current active semester
+    const registration = activeSemester 
+      ? await StudentRegistration.findOne({ student: studentId, semester: activeSemester._id })
+      : null;
 
     if (!registration) {
-      return res.json({ exists: false });
+      return res.json({ 
+        success: true, 
+        exists: false,
+        message: activeSemester ? `No registration for ${activeSemester.name}` : "No active semester"
+      });
     }
 
     res.json({
+      success: true,
       exists: true,
       status: registration.status,
       adminRemark: registration.adminRemark,
@@ -155,44 +184,57 @@ export async function getMyRegistrationStatus(req: any, res: any) {
     });
 
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`getMyRegistrationStatus error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
-
-import PaymentSettings from "../models/paymentSettings.js";
 
 export async function getPaymentStatus(req: any, res: any) {
   try {
     const studentId = req.student._id;
-    const payment = await Payment.findOne({ student: studentId }).populate("student", "full_name enrollment_number");
-    
-    // Always fetch global settings for the breakdown display
+
+    const payment = await Payment.findOne({
+      student: studentId,
+    }).populate("student", "full_name enrollment_number");
+
     let settings = await PaymentSettings.findOne();
     if (!settings) {
       settings = { feeBreakdown: [], totalAmountRequired: 0 } as any;
     }
 
+    // 1. If NO payment record exists yet in DB
     if (!payment) {
-      return res.json({ 
-        exists: false, 
-        amountRequired: settings.totalAmountRequired, 
-        feeBreakdown: settings.feeBreakdown 
+      return res.json({
+        success: true,
+        exists: false,
+        data: {
+          status: "UNPAID",
+          amountRequired: settings.totalAmountRequired,
+          feeBreakdown: settings.feeBreakdown,
+          adminRemark: "",
+        },
       });
     }
-    
-    // If payment exists but it's UNPAID/PENDING without its own snapshot, or we just want to ensure it has the global data for rendering
-    res.json({ 
-      exists: true, 
+
+    // 2. If a payment record DOES exist in DB
+    const paymentObj = payment.toObject();
+    const useLatestSettings = payment.status === "UNPAID" || payment.status === "REJECTED";
+
+    return res.json({
+      success: true,
+      exists: true,
       data: {
-        ...payment.toObject(),
-        feeBreakdown: payment.feeBreakdown?.length ? payment.feeBreakdown : settings.feeBreakdown,
-        amountRequired: payment.amountRequired || settings.totalAmountRequired
-      } 
+        ...paymentObj,
+        amountRequired: useLatestSettings ? settings.totalAmountRequired : payment.amountRequired,
+        feeBreakdown: useLatestSettings ? settings.feeBreakdown : payment.feeBreakdown,
+      },
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`getPaymentStatus error: ${error.message}`);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
+
 
 export async function submitPayment(req: any, res: any) {
   try {
@@ -208,7 +250,7 @@ export async function submitPayment(req: any, res: any) {
       return res.status(400).json({ success: false, message: "Payment already submitted or processing" });
     }
 
-    const slip_image_url = saveBase64Image(slip_image, 'slip');
+    const slip_image_url = await saveBase64Image(slip_image, 'slip');
     if (!slip_image_url) {
       return res.status(400).json({ success: false, message: "Invalid image format" });
     }
@@ -241,6 +283,7 @@ export async function submitPayment(req: any, res: any) {
 
     res.status(201).json({ success: true, message: "Payment submitted", data: payment });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    logger.error(`submitPayment error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
