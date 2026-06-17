@@ -101,9 +101,13 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
                 </span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-500 font-bold text-xs uppercase tracking-widest">
-                  {registration.year_of_study} / Faculty of<span className="px-3 py-0.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                  {registration.year_of_study} / Faculty of <span className="px-3 py-0.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100">
                   {registration.major}
                 </span>
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="px-3 py-0.5 bg-amber-50 text-amber-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                  {registration.semester?.name} ({registration.semester?.academicYear})
                 </span>
               </div>
             </div>
@@ -170,8 +174,8 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <InfoCard label="အမည် (Myanmar)" value={registration.name_mm} icon={User} />
               <InfoCard label="အမည် (English)" value={registration.name_en} icon={User} />
-              {/* <InfoCard label="မှတ်ပုံတင်အမှတ်" value={registration.nrc} icon={ShieldCheck} />
-              <InfoCard label="မွေးသက္ကရာဇ်" value={new Date(registration.dob).toLocaleDateString()} icon={Calendar} /> */}
+              <InfoCard label="မှတ်ပုံတင်အမှတ်" value={registration.student?.nrc} icon={ShieldCheck} />
+              <InfoCard label="မွေးသက္ကရာဇ်" value={registration.student?.date_of_birth ? new Date(registration.student.date_of_birth).toLocaleDateString() : 'N/A'} icon={Calendar} />
               <InfoCard label="မွေးဖွားရာဇာတိ" value={registration.birth_place} icon={MapPin} />
               <InfoCard label="ကိုးကွယ်သည့်ဘာသာ" value={registration.religion} icon={MapPin} />
               <InfoCard label="နိုင်ငံသား" value={registration.nationality} icon={MapPin} />
@@ -188,7 +192,7 @@ export default function StudentRegistrationDetailModal({ isOpen, onClose, regist
             <SectionTitle icon={GraduationCap} title="တက္ကသိုလ်ဝင်တန်းစာမေးပွဲ အချက်အလက်" subtitle="Verified Academic Records" />
             <div className="space-y-8">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* <InfoCard label="ခုမှတ်" value={registration.matric_roll_no} icon={GraduationCap} /> */}
+                <InfoCard label="G12 Exam ID" value={registration.student?.g12_exam_id} icon={GraduationCap} />
                 <InfoCard label="ခုနှစ်" value={registration.matric_year} icon={FileText} />
                 <InfoCard label="စာစစ်ဌာန" value={registration.matric_dept} icon={Home} />
               </div>

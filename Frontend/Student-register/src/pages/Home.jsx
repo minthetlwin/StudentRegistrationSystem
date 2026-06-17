@@ -29,10 +29,10 @@ export default function Home() {
     },
     {
       title: 'Senior Registration',
-      description: 'Continuing students registering for the new semester.',
+      description: 'Returning students please login to register for the next semester.',
       icon: UserPlus,
       color: 'bg-indigo-500',
-      link: '/register'
+      link: '/login'
     },
     {
       title: 'Dormitory',

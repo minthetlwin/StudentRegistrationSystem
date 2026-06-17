@@ -171,6 +171,8 @@ export async function getMyRegistrationStatus(req: any, res: any) {
       return res.json({ 
         success: true, 
         exists: false,
+        isRegistrationOpen: activeSemester ? activeSemester.isRegistrationOpen : false,
+        isPaymentOpen: activeSemester ? activeSemester.isPaymentOpen : false,
         message: activeSemester ? `No registration for ${activeSemester.name}` : "No active semester"
       });
     }
@@ -180,6 +182,8 @@ export async function getMyRegistrationStatus(req: any, res: any) {
       exists: true,
       status: registration.status,
       adminRemark: registration.adminRemark,
+      isRegistrationOpen: activeSemester ? activeSemester.isRegistrationOpen : false,
+      isPaymentOpen: activeSemester ? activeSemester.isPaymentOpen : false,
       data: registration
     });
 
@@ -193,9 +197,13 @@ export async function getPaymentStatus(req: any, res: any) {
   try {
     const studentId = req.student._id;
 
-    const payment = await Payment.findOne({
-      student: studentId,
-    }).populate("student", "full_name enrollment_number");
+    // Get active semester
+    const activeSemester = await Semester.findOne({ isActive: true });
+    
+    // Find payment for current active semester
+    const payment = activeSemester 
+      ? await Payment.findOne({ student: studentId, semester: activeSemester._id })
+      : null;
 
     let settings = await PaymentSettings.findOne();
     if (!settings) {
@@ -245,9 +253,19 @@ export async function submitPayment(req: any, res: any) {
       return res.status(400).json({ success: false, message: "Slip image is required" });
     }
 
-    const existingPayment = await Payment.findOne({ student: studentId });
+    // Get active semester
+    const activeSemester = await Semester.findOne({ isActive: true });
+    if (!activeSemester) {
+      return res.status(400).json({ success: false, message: "No active semester for payment." });
+    }
+
+    const existingPayment = await Payment.findOne({ 
+      student: studentId, 
+      semester: activeSemester._id 
+    });
+
     if (existingPayment && existingPayment.status !== "REJECTED" && existingPayment.status !== "UNPAID") {
-      return res.status(400).json({ success: false, message: "Payment already submitted or processing" });
+      return res.status(400).json({ success: false, message: "Payment already submitted or processing for this semester." });
     }
 
     const slip_image_url = await saveBase64Image(slip_image, 'slip');
@@ -261,7 +279,7 @@ export async function submitPayment(req: any, res: any) {
     let payment;
     if (existingPayment && (existingPayment.status === "REJECTED" || existingPayment.status === "UNPAID")) {
       payment = await Payment.findOneAndUpdate(
-        { student: studentId },
+        { _id: existingPayment._id },
         { 
           slip_image_url, 
           status: "PENDING", 
@@ -274,6 +292,7 @@ export async function submitPayment(req: any, res: any) {
     } else {
       payment = await Payment.create({
         student: studentId,
+        semester: activeSemester._id,
         slip_image_url,
         amountRequired: settings.totalAmountRequired,
         feeBreakdown: settings.feeBreakdown,

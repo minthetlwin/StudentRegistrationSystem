@@ -10,6 +10,9 @@ export default function DashboardContainer() {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [registrationStatus, setRegistrationStatus] = useState('PENDING');
+  const [registrationExists, setRegistrationExists] = useState(false);
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,8 +31,14 @@ export default function DashboardContainer() {
       if (storedRole === 'student') {
         try {
           const statusRes = await getMyRegistrationStatus();
+          setIsRegistrationOpen(statusRes.isRegistrationOpen || false);
+          setIsPaymentOpen(statusRes.isPaymentOpen || false);
+
           if (statusRes && statusRes.exists) {
             setRegistrationStatus(statusRes.status);
+            setRegistrationExists(true);
+          } else {
+            setRegistrationExists(false);
           }
         } catch (e) {
           console.error("Failed to get registration status:", e);
@@ -56,6 +65,9 @@ export default function DashboardContainer() {
       loading={loading}
       onLogout={handleLogout}
       registrationStatus={registrationStatus}
+      registrationExists={registrationExists}
+      isRegistrationOpen={isRegistrationOpen}
+      isPaymentOpen={isPaymentOpen}
     />
   );
 }

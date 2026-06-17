@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getStudentRegistrations, updateStudentRegistrationStatus } from '../../services/adminServices';
 import StudentRegistrationDetailModal from '../adminComponents/StudentRegistrationDetailModal';
+import AdminStats from '../adminComponents/AdminStats';
 import { 
   Search, 
   Filter, 
@@ -42,6 +43,13 @@ export default function StudentRegistrationList() {
     }
   };
 
+  const getStats = () => [
+    { label: 'Total Applications', value: registrations.length, icon: User, color: 'indigo' },
+    { label: 'Pending Review', value: registrations.filter(r => r.status === 'PENDING').length, icon: Clock, color: 'amber' },
+    { label: 'Approved', value: registrations.filter(r => r.status === 'APPROVED').length, icon: CheckCircle, color: 'emerald' },
+    { label: 'Rejected', value: registrations.filter(r => r.status === 'REJECTED').length, icon: XCircle, color: 'rose' },
+  ];
+
   const filterData = () => {
     let result = [...registrations];
     
@@ -54,7 +62,7 @@ export default function StudentRegistrationList() {
       result = result.filter(reg => 
         reg.student?.full_name?.toLowerCase().includes(lowerSearch) ||
         reg.student?.enrollment_number?.toLowerCase().includes(lowerSearch) ||
-        reg.nrc?.toLowerCase().includes(lowerSearch)
+        reg.student?.nrc?.toLowerCase().includes(lowerSearch)
       );
     }
     
@@ -108,20 +116,18 @@ export default function StudentRegistrationList() {
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header & Stats */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Student Registrations</h1>
-          <p className="text-slate-500 font-medium">Review and manage new student admission forms</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-50 transition-all shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-end gap-2">
+        <div className="flex items-center gap-2">
+          <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 text-xs font-bold hover:bg-slate-50 transition-all shadow-sm">
             <FileDown className="w-4 h-4" />
-            Export Data
+            EXPORT
           </button>
         </div>
       </div>
+
+      <AdminStats stats={getStats()} />
 
       {/* Message Notifications */}
       {message.text && (
@@ -134,24 +140,24 @@ export default function StudentRegistrationList() {
       )}
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
           <input 
             type="text" 
             placeholder="Search by name, ID or NRC..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-900"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-medium text-slate-900"
           />
         </div>
         
         <div className="relative">
-          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700 appearance-none cursor-pointer"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-bold text-slate-700 appearance-none cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending Only</option>
@@ -160,71 +166,76 @@ export default function StudentRegistrationList() {
           </select>
         </div>
 
-        <div className="bg-indigo-600 rounded-2xl px-6 py-3 flex items-center justify-between shadow-lg shadow-indigo-100">
-          <span className="text-white font-bold">Total Found</span>
-          <span className="bg-white/20 text-white px-3 py-0.5 rounded-full font-black text-sm">{filteredRegistrations.length}</span>
+        <div className="bg-indigo-600 rounded-xl px-5 py-2.5 flex items-center justify-between">
+          <span className="text-white font-bold text-xs uppercase tracking-wider">Total Match</span>
+          <span className="bg-white/20 text-white px-3 py-0.5 rounded-lg font-black text-xs">{filteredRegistrations.length}</span>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">Student Info</th>
-                <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">Year / Program</th>
-                <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">Submission</th>
-                <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">Status</th>
-                <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 text-center">Action</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Student Identity</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Year / Program</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Semester</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Submission</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Status</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRegistrations.length > 0 ? (
                 filteredRegistrations.map((reg) => (
-                  <tr key={reg._id} className="group hover:bg-slate-50/80 transition-colors">
-                    <td className="px-6 py-5">
+                  <tr key={reg._id} className="group hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center overflow-hidden">
+                        <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden">
                           {reg.profile_photo_url ? (
                             <img src={reg.profile_photo_url} alt="Profile" className="w-full h-full object-cover" />
                           ) : (
-                            <User className="w-6 h-6 text-indigo-400" />
+                            <User className="w-5 h-5 text-slate-400" />
                           )}
                         </div>
                         <div>
-                          <p className="font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors truncate max-w-[200px]">
+                          <p className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate max-w-[180px]">
                             {reg.student?.full_name || 'Unknown'}
                           </p>
-                          <p className="text-xs font-bold text-slate-400 font-mono italic">
+                          <p className="text-[10px] font-bold text-slate-400 font-mono tracking-tighter">
                             {reg.student?.enrollment_number || 'N/A'}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <p className="font-bold text-slate-700">{reg.year_of_study}</p>
-                      <p className="text-xs font-medium text-slate-400 italic">Faculty of {reg.major || 'N/A'}</p>
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-bold text-slate-700">{reg.year_of_study}</p>
+                      <p className="text-[10px] font-medium text-slate-400 truncate max-w-[150px]">Faculty of {reg.major || 'N/A'}</p>
                     </td>
-                    <td className="px-6 py-5">
-                      <p className="text-sm font-bold text-slate-700">
+                    <td className="px-6 py-4">
+                      <p className="text-xs font-bold text-indigo-600">{reg.semester?.name || 'N/A'}</p>
+                      <p className="text-[9px] font-bold text-slate-400">{reg.semester?.academicYear || ''}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-xs font-bold text-slate-700">
                         {new Date(reg.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
                         {new Date(reg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-4">
                       {getStatusBadge(reg.status)}
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-4">
                       <div className="flex justify-center">
                         <button 
                           onClick={() => setSelectedReg(reg)}
-                          className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200/50 hover:shadow-indigo-200 hover:-translate-y-0.5 active:translate-y-0"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg font-bold text-[11px] hover:bg-slate-800 transition-all shadow-sm"
                         >
-                          <Eye className="w-4 h-4" />
-                          Review
+                          <Eye className="w-3.5 h-3.5" />
+                          REVIEW
                         </button>
                       </div>
                     </td>
