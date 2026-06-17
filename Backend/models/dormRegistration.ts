@@ -60,5 +60,8 @@ const DormRegistrationSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// One dorm registration per student per semester
+DormRegistrationSchema.index({ student: 1, semester: 1 }, { unique: true });
+
 export default  mongoose.model("DormRegistration", DormRegistrationSchema);
 

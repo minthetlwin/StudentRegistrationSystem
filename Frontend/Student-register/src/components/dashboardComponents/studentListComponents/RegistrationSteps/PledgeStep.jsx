@@ -5,7 +5,8 @@ import { User, ShieldCheck, CheckCircle } from 'lucide-react';
 import { inputStyle, labelStyle } from './formStyles';
 
 const PledgeStep = ({ pledgeAgreed, setPledgeAgreed }) => {
-  const { register } = useFormContext();
+  const { register, watch } = useFormContext();
+  const hasSponsor = watch("sponsor_name", "ရှိ");
 
   const pledges = [
     "အထက်ဖော်ပြပါ အချက်အားလုံးမှန်ကန်ပါသည်။",
@@ -34,32 +35,47 @@ const PledgeStep = ({ pledgeAgreed, setPledgeAgreed }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
          <div className="col-span-2">
-          <label className={labelStyle}>ပညာသင်ချောင်ပ့ကြေး ပေးနှင် ကူညီမည့်ပုဂ္ဂိုလ် (ရှိပါက)</label>
-            <select {...register("sponser_name")} className={inputStyle} >
+          <label className={labelStyle}>ပညာသင်ထောက်ပံ့ကြေး ပေးအပ်မည့်ပုဂ္ဂိုလ် (ရှိပါက)</label>
+            <select {...register("sponsor_name")} className={inputStyle} >
                         <option value="ရှိ">ရှိ</option>
                         <option value="မရှိ">မရှိ</option>
             </select>
         </div>
-        <div>
-          <label className={labelStyle}>(က) အမည်</label>
-          <input {...register("guarantor_name")} className={inputStyle} placeholder="အုပ်ထိန်းသူ အမည်" />
-        </div>
-        <div>
-          <label className={labelStyle}>(ဂ) အလုပ်အကိုင်</label>
-          <input {...register("guarantor_occupation")} className={inputStyle} placeholder="လုပ်ငန်းအမျိုးအစား" />
-        </div>
-        <div className="col-span-2">
-          <label className={labelStyle}>(ခ) နေရပ်လိပ်စာ</label>
-          <textarea {...register("guarantor_address")} className={`${inputStyle} h-20 resize-none`} placeholder="အိမ်အမှတ်၊ လမ်း၊ ရပ်ကွက်၊ မြို့နယ်..." />
-        </div>
-        <div>
-          <label className={labelStyle}>(ဃ) ဆက်သွယ်ရန် ဖုန်းနံပါတ်</label>
-          <input {...register("guarantor_phone")} className={inputStyle} placeholder="၀၉-xxxxxxxxx" />
-        </div>
-        <div>
-          <label className={labelStyle}>မှတ်ပုံတင်အမှတ်</label>
-          <input {...register("guarantor_nrc")} className={inputStyle} placeholder="၉/မရတ(နိုင်)xxxxxx" />
-        </div>
+
+        {hasSponsor === "ရှိ" && (
+          <>
+            <div>
+              <label className={labelStyle}>(က) အမည်</label>
+              <input {...register("guarantor_name", { required: hasSponsor === "ရှိ" })} className={inputStyle} placeholder="အုပ်ထိန်းသူ အမည်" />
+              {errors.guarantor_name && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">Required</span>}
+            </div>
+            <div>
+              <label className={labelStyle}>(ဂ) အလုပ်အကိုင်</label>
+              <input {...register("guarantor_occupation", { required: hasSponsor === "ရှိ" })} className={inputStyle} placeholder="လုပ်ငန်းအမျိုးအစား" />
+              {errors.guarantor_occupation && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">Required</span>}
+            </div>
+            <div className="col-span-2">
+              <label className={labelStyle}>(ခ) နေရပ်လိပ်စာ</label>
+              <textarea {...register("guarantor_address", { required: hasSponsor === "ရှိ" })} className={`${inputStyle} h-20 resize-none`} placeholder="အိမ်အမှတ်၊ လမ်း၊ ရပ်ကွက်၊ မြို့နယ်..." />
+              {errors.guarantor_address && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">Required</span>}
+            </div>
+            <div>
+              <label className={labelStyle}>(ဃ) ဆက်သွယ်ရန် ဖုန်းနံပါတ်</label>
+              <input {...register("guarantor_phone", { required: hasSponsor === "ရှိ" })} className={inputStyle} placeholder="၀၉-xxxxxxxxx" />
+              {errors.guarantor_phone && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">Required</span>}
+            </div>
+            <div>
+              <label className={labelStyle}>တော်စပ်ပုံ</label>
+              <input {...register("guarantor_relation", { required: hasSponsor === "ရှိ" })} className={inputStyle} placeholder="ဥပမာ - ဖခင်၊ မိခင်" />
+              {errors.guarantor_relation && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">Required</span>}
+            </div>
+            <div>
+              <label className={labelStyle}>မှတ်ပုံတင်အမှတ်</label>
+              <input {...register("guarantor_nrc", { required: hasSponsor === "ရှိ" })} className={inputStyle} placeholder="၉/မရတ(နိုင်)xxxxxx" />
+              {errors.guarantor_nrc && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider">Required</span>}
+            </div>
+          </>
+        )}
        
       </div>
 

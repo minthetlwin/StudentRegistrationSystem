@@ -46,4 +46,7 @@ const PaymentSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// One payment per student per semester
+PaymentSchema.index({ student: 1, semester: 1 }, { unique: true });
+
 export default mongoose.model("Payment", PaymentSchema);

@@ -14,19 +14,11 @@ export default function LoginContainer() {
     
     try {
       const result = await loginStudent(data);
-      console.log('Login result:', result);
-      
       if (result.success) {
         // Store user data in localStorage
         localStorage.setItem('user', JSON.stringify(result.user));
         localStorage.setItem('token', result.token);
         localStorage.setItem('role', result.role || result.user.role || 'student');
-        
-        // console.log('Stored in localStorage:', {
-        //   student: result.student,
-        //   token: !!result.token,
-        //   role: result.role || result.student.role
-        // });
         
         setMessage('✓ Login successful! Redirecting...');
         

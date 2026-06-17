@@ -65,13 +65,16 @@ export default function AddSemester({ onRefresh }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-xl bg-white p-8 rounded-3xl shadow-md space-y-6 border border-slate-100"
+      className="max-w-xl bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 space-y-5"
     >
-      <h2 className="text-2xl font-bold text-slate-900">Add New Semester</h2>
+      <div>
+        <h2 className="text-xl font-black text-slate-900 tracking-tight">Add New Session</h2>
+        <p className="text-xs font-medium text-slate-500">Initialize a new academic semester</p>
+      </div>
 
       {message && (
         <div
-          className={`p-4 rounded-xl text-sm border font-medium ${
+          className={`p-3 rounded-lg text-xs border font-medium animate-in zoom-in-95 duration-200 ${
             message.includes('success')
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
               : 'bg-rose-50 text-rose-700 border-rose-200'
@@ -82,24 +85,24 @@ export default function AddSemester({ onRefresh }) {
       )}
 
       {/* Semester Name */}
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-1">
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight">
           Semester Name
         </label>
         <input
           type="text"
           name="name"
-          placeholder="e.g. Semester 1"
+          placeholder="e.g. First Year - Semester 1"
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
         />
       </div>
 
       {/* Academic Year */}
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-1">
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight">
           Academic Year
         </label>
         <input
@@ -109,38 +112,41 @@ export default function AddSemester({ onRefresh }) {
           value={formData.academicYear}
           onChange={handleChange}
           required
-          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
         />
       </div>
 
-      {/* Dates */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Start Date
-          </label>
-          <input
-            type="date"
-            name="startDate"
-            value={formData.startDate}
-            onChange={handleChange}
-            required
-            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-          />
-        </div>
+      {/* Dates Selection */}
+      <div className="space-y-4 pt-2 border-t border-slate-100/60">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Timeline Configuration</p>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+              Start Date
+            </label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+              required
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">
-            End Date
-          </label>
-          <input
-            type="date"
-            name="endDate"
-            value={formData.endDate}
-            onChange={handleChange}
-            required
-            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-          />
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+              End Date
+            </label>
+            <input
+              type="date"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleChange}
+              required
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
+            />
+          </div>
         </div>
       </div>
 
@@ -162,7 +168,7 @@ export default function AddSemester({ onRefresh }) {
           </div>
         </label>
 
-        {/* Registration Window */}
+        {/* Dormitory Window */}
         <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-colors">
           <input
             type="checkbox"
@@ -172,8 +178,8 @@ export default function AddSemester({ onRefresh }) {
             className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500"
           />
           <div>
-            <p className="text-sm font-semibold text-slate-800">Open Registration Portal</p>
-            <p className="text-xs text-slate-500">Allow students to submit registration applications for this semester.</p>
+            <p className="text-sm font-semibold text-slate-800">Open Dormitory Portal</p>
+            <p className="text-xs text-slate-500">Allow students to submit dormitory applications for this semester.</p>
           </div>
         </label>
 

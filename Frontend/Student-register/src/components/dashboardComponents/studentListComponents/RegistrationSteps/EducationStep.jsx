@@ -43,14 +43,7 @@ const EducationStep = () => {
           <option value="none">none</option>
         </select>
       </div>
-      {/* <div>
-        <label className={labelStyle}>ခုံအမှတ်</label>
-        <input {...register("roll_no", { required: true })} className={inputStyle} placeholder="၁-CS-၁" />
-      </div>
-      <div>
-        <label className={labelStyle}>တက္ကသိုလ်မှတ်ပုံတင်အမှတ်</label>
-        <input {...register("reg_no")} className={inputStyle} placeholder="C-12345" />
-      </div> */}
+      {/* Roll number and university registration are managed via auth data or updated by admin */}
       <div>
         <label className={labelStyle}>တက္ကသိုလ်၀င်ရောက်သည့်နှစ်</label>
         <input {...register("yr_no")} className={inputStyle} placeholder="2019-2020" />

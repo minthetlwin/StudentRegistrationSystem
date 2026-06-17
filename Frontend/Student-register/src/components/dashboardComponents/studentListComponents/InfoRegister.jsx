@@ -78,7 +78,9 @@ export default function InfoRegister({ user, role, onComplete }) {
       await registerStudent(finalData);
       setSubmissionStatus('success');
     } catch (err) {
-      setErrorMessage(err.message || "Something went wrong during registration.");
+      // Improved error handling
+      const errorMessage = typeof err === 'string' ? err : (err?.message || "Something went wrong during registration.");
+      setErrorMessage(errorMessage);
       setSubmissionStatus('idle');
     }
   };

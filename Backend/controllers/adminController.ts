@@ -632,6 +632,7 @@ export const getStudentRegistrations = async (req: any, res: any) => {
   try {
     const registrations = await StudentRegistration.find()
       .populate('student', 'full_name enrollment_number g12_exam_id nrc date_of_birth')
+      .populate('semester', 'name academicYear')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -658,7 +659,8 @@ export const updateStudentRegistrationStatus = async (req: any, res: any) => {
         reviewedAt: new Date()
       },
       { new: true }
-    ).populate('student', 'full_name enrollment_number current_year');
+    ).populate('student', 'full_name enrollment_number current_year')
+     .populate('semester', 'name academicYear');
 
     if (!updated) {
       return res.status(404).json({ 

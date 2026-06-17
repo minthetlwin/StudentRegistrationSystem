@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, IndianRupee, CheckCircle, XCircle, Eye, HandCoins, Pencil } from 'lucide-react';
+import { Search, Loader2, IndianRupee, CheckCircle, XCircle, Eye, HandCoins, Pencil, Clock } from 'lucide-react';
 import { getPayments, updatePaymentStatus, getPaymentSettings, updatePaymentSettings } from '../../services/adminServices';
 import ViewSlipModal from '../adminComponents/ViewSlipModal';
 import FeeBreakdownModal from '../adminComponents/FeeBreakdownModal';
+import AdminStats from '../adminComponents/AdminStats';
 
 export default function PaymentList({ user, role }) {
   const [payments, setPayments] = useState([]);
@@ -29,6 +30,13 @@ export default function PaymentList({ user, role }) {
       setLoading(false);
     }
   };
+
+  const getStats = () => [
+    { label: 'Total Payments', value: payments.length, icon: HandCoins, color: 'indigo' },
+    { label: 'Pending Verification', value: payments.filter(p => p.status === 'PENDING').length, icon: Clock, color: 'amber' },
+    { label: 'Successful', value: payments.filter(p => p.status === 'APPROVED').length, icon: CheckCircle, color: 'emerald' },
+    { label: 'Rejected', value: payments.filter(p => p.status === 'REJECTED').length, icon: XCircle, color: 'rose' },
+  ];
 
   useEffect(() => {
     fetchPaymentsAndSettings();
@@ -75,27 +83,27 @@ export default function PaymentList({ user, role }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-          <HandCoins className="mr-2 text-indigo-600" />
-          Student Payments
-        </h2>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      {error && <div className="p-4 bg-rose-50 text-rose-600 rounded-xl">{error}</div>}
+      
+      <AdminStats stats={getStats()} />
+
+      <div className="flex flex-col sm:flex-row justify-end items-center gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
             onClick={() => setIsEditingSettings(true)}
-            className="flex items-center justify-center px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium rounded-xl transition-colors border border-indigo-200 shadow-sm whitespace-nowrap"
+            className="flex items-center justify-center px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors border border-indigo-200 shadow-sm whitespace-nowrap"
           >
-            <Pencil className="w-4 h-4 mr-2" />
-            Adjust Global Fees
+            <Pencil className="w-3.5 h-3.5 mr-2" />
+            Adjust Fees
           </button>
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+          <div className="relative w-full sm:w-60 group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 w-4 h-4 transition-colors" />
             <input
               type="text"
-              placeholder="Search by ID, Name or NRC..."
+              placeholder="Search by ID, Name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border-slate-200 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              className="w-full pl-10 pr-4 py-2 border-slate-200 border rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-sm font-medium transition-all"
             />
           </div>
         </div>
@@ -103,20 +111,20 @@ export default function PaymentList({ user, role }) {
       
       {error && <div className="p-4 bg-rose-50 text-rose-600 rounded-xl">{error}</div>}
 
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden auto-scroll-x">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
-            <thead className="bg-slate-50 border-b border-slate-200">
+          <table className="w-full min-w-[800px] border-collapse">
+            <thead className="bg-slate-50/50 border-b border-slate-100">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Sr</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Student</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Slip</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">#</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Student</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Slip</th>
+                <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-100">
               {filteredPayments.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-slate-500">No payments found</td>

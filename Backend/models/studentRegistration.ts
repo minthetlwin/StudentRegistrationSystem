@@ -94,6 +94,7 @@ const studentRegistrationSchema = new mongoose.Schema(
     guarantor_address: { type: String },
     guarantor_phone: { type: String },
     guarantor_nrc: { type: String },
+    guarantor_relation: { type: String },
     sponsor_name: { type: String },
     pledge_agreed: { type: Boolean, default: false, required: true },
 
@@ -117,6 +118,7 @@ const studentRegistrationSchema = new mongoose.Schema(
 );
 
 // One registration per student per semester
+// NOTE: If you get a duplicate key error on "student_1", manually drop that index from your database.
 studentRegistrationSchema.index({ student: 1, semester: 1 }, { unique: true });
 
 export default mongoose.model("StudentRegistration", studentRegistrationSchema);

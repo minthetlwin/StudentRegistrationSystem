@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from "./pages/Home"
 import Navbar from "./components/Navbar"
-import StudentPasswordContainer from "./containers/StudentPasswordContainer"
+import RegisterContainer from './containers/RegisterContainer'
 import StudentTypeSelector from './components/StudentTypeSelector'
 import LoginContainer from './containers/LoginContainer'
 import AdminContainer from './containers/AdminContainer'
@@ -15,7 +15,7 @@ function App() {
       <Routes>
         {/* Pages that use MainLayout (Navbar included) */}
         <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-        <Route path="/register" element={<MainLayout><StudentPasswordContainer /></MainLayout>} />
+        <Route path="/register" element={<MainLayout><RegisterContainer /></MainLayout>} />
         <Route path="/student-type" element={<MainLayout><StudentTypeSelector /></MainLayout>} />
         <Route path="/login" element={<MainLayout><LoginContainer /></MainLayout>} />
         <Route path="/admin-login" element={<MainLayout><AdminContainer /></MainLayout>} />

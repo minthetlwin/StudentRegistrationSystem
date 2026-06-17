@@ -28,7 +28,7 @@ body {
   }
   
   .glass-card:hover {
-    @apply shadow-md border-slate-300/50 -translate-y-0.5;
+    @apply shadow-md border-slate-300/50;
   }
 
   .btn-primary {
